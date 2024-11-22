@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+// import { useState } from 'react';
+// import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import Navbar from './components/NavBar';
 import Hero from './components/Hero';
 import HomeCards from './components/HomeCards';
@@ -27,15 +27,15 @@ const App = () => {
 }
 
 export default App
-
-{/* function App() {
+{/* 
+function App() {
   const [count, setCount] = useState(0)
 
-//   var map = L.map('map').setView([51.505, -0.09], 13);
-//   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-//     maxZoom: 19,
-//     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-// }).addTo(map);
+  var map = L.map('map').setView([51.505, -0.09], 13);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}).addTo(map);
 
   return (
     <>
