@@ -90,3 +90,9 @@ Previous commands to run both together using concurrently
     "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
     "start:frontend": "cd frontend && npm run dev",
     "start:backend": "cd backend && source venv/bin/Activate && flask run --debug"
+
+
+
+Routes Api:
+IO have chosen to use the v2 routes api as updated. 
+https://console.cloud.google.com/apis/library/routes.googleapis.com?project=eng-archery-442218-t3 -> go here to enable your api, maybe just for my accopunt or whatevcrtr 

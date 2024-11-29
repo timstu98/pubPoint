@@ -8,10 +8,14 @@ services:
     environment:
       - FLASK_ENV=development
       - DATABASE_URL=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
     depends_on:
       - mysql
     volumes:
         - ./backend:/app
+        - ./backed/mock_data/addresses.json:/app/mock_data.json
 
 
   frontend:
@@ -19,7 +23,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: frontend
-    restart: always
+    # restart: always
     ports:
       - "3000:3000"
     volumes:
