@@ -85,16 +85,13 @@ def calculate_centre(coordinates):
 
 @app.route("/api/get-centre", methods=["POST"])
 def get_centre():
-    response = group_addresses().get_json()
-    # print(response)
-    # data = response.get_json()
-    # addresses = data.get("addresses", [])
+    response = get_users().get_json()
+    for user in response:
+        print(user["address"])
 
     coordinates = []
     for item in response:
-        # print(item)
         coords = geocode_address(item["address"])
-        # print(coords)
         if coords:
             coordinates.append(coords)
 
@@ -146,14 +143,15 @@ def get_journey_time():
 
 @app.route("/api/get-journey-times", methods=["GET"])
 def get_journey_times():
-    address_response = group_addresses().get_json()
+    response = get_users().get_json()
     centre_response = get_centre().get_json()
 
     journey_times = []
     url = f"http://localhost:5001/api/get-journey-time"
-    for address_entry in address_response:
+    for user_entry in response:
+
         # Call the /get-journey-time endpoint
-        coords_user = geocode_address(address_entry["address"])
+        coords_user = geocode_address(user_entry["address"])
         params = {"origin_lat": coords_user[0], "origin_lng": coords_user[1], "dest_lat": centre_response["lat"], "dest_lng": centre_response["lng"]}
         response = requests.get(url, params=params)
         journey_time = response.json()
