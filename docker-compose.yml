@@ -16,6 +16,10 @@ services:
     volumes:
         - ./backend:/app
         - ./backed/mock_data/addresses.json:/app/mock_data.json
+        - ./backed/mock_data/groups.json:/app/groups.json
+        - ./backed/mock_data/pubs.json:/app/pubs.json
+        - ./backed/mock_data/userGroupQuery.json:/app/userGroupQuery.json
+        - ./backed/mock_data/users.json:/app/users.json
 
 
   frontend:
