@@ -14,12 +14,13 @@ services:
     depends_on:
       - mysql
     volumes:
-        - ./backend:/app
-        - ./backed/mock_data/addresses.json:/app/mock_data.json
-        - ./backed/mock_data/groups.json:/app/groups.json
-        - ./backed/mock_data/pubs.json:/app/pubs.json
-        - ./backed/mock_data/userGroupQuery.json:/app/userGroupQuery.json
-        - ./backed/mock_data/users.json:/app/users.json
+        - ./backend:/app/
+        # - ./backend/mock_data:/app/mock_data
+        # - ./backend/mock_data/addresses.json:/app/mock_data.json
+        # - ./backend/mock_data/groups.json:/app/groups.json
+        # - ./backend/mock_data/pubs.json:/app/pubs.json
+        # - ./backend/mock_data/userGroupQuery.json:/app/userGroupQuery.json
+        # - ./backend/mock_data/users.json:/app/users.json
 
 
   frontend:

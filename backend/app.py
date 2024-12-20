@@ -11,9 +11,12 @@ import pymysql  # Make sure to include pymysql or another MySQL driver in requir
 import time
 
 ### Env variables
-load_dotenv(dotenv_path="../.env")
+load_dotenv(dotenv_path="/app/.env")
 MOCK_MODE = os.getenv("MOCK_MODE", "true").lower() == "true"
-addresses_json = "mock_data/addresses.json"
+groups_json = "/app/mock_data/groups.json"
+pubs_json = "/app/mock_data/pubs.json"
+user_group_query_json = "/app/mock_data/userGroupQuery.json"
+users_json = "/app/mock_data/users.json"
 # Get database connection details from environment variables
 db_user = os.getenv("MYSQL_USER", "user")
 db_password = os.getenv("MYSQL_PASSWORD", "password")
@@ -33,11 +36,30 @@ def do():
     return "Hello, world!"
 
 
-@app.route("/api/group-addresses", methods=["GET"])
-def group_addresses():
-    with open(addresses_json) as file:
+def load_mock_json(mock_json):
+    with open(mock_json) as file:
         data = json.load(file)
     return jsonify(data)
+
+
+@app.route("/api/groups", methods=["GET"])
+def get_groups():
+    return load_mock_json(groups_json)
+
+
+@app.route("/api/pubs", methods=["GET"])
+def get_pubs():
+    return load_mock_json(pubs_json)
+
+
+@app.route("/api/user-group-query", methods=["GET"])
+def get_user_group_query():
+    return load_mock_json(user_group_query_json)
+
+
+@app.route("/api/users", methods=["GET"])
+def get_users():
+    return load_mock_json(users_json)
 
 
 # Geocode function to convert addresses to coordinates
