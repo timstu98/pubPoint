@@ -147,14 +147,11 @@ def get_journey_times():
     centre_response = get_centre().get_json()
 
     journey_times = []
-    url = f"http://localhost:5001/api/get-journey-time"
+    url = f"http://localhost:5001/api/get-journey-time"  # Needed due to collection of parmams
     for user_entry in response:
-
-        # Call the /get-journey-time endpoint
         coords_user = geocode_address(user_entry["address"])
         params = {"origin_lat": coords_user[0], "origin_lng": coords_user[1], "dest_lat": centre_response["lat"], "dest_lng": centre_response["lng"]}
         response = requests.get(url, params=params)
         journey_time = response.json()
         journey_times.append(journey_time)
-        # time.sleep(2)
     return jsonify(journey_times), 200
