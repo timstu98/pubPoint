@@ -17,7 +17,7 @@ class Pub(db.Model):
     address = db.Column(db.String(250), nullable=False)
 
     def get_as_dict(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+        return {"id": self.id, "type": "pub", "attributes": {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs if c.key != "id"}}
 
 
 class Group(db.Model):

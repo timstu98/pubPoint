@@ -12,6 +12,8 @@ from dotenv import load_dotenv
 import pymysql  # Make sure to include pymysql or another MySQL driver in requirements.txt
 import time
 
+from api.routes.pubs_routes import pubs_routes
+
 ### Env variables
 load_dotenv(dotenv_path="/app/.env")
 # Get database connection details from environment variables
@@ -27,7 +29,6 @@ OUTPUT_PUBS_JSON = os.getenv("OUTPUT_JSON", "true").lower() == "true"
 
 # Mock data paths
 path_to_groups_json = "/app/mock_data/groups.json"
-path_to_pubs_json = "/app/mock_data/pubs.json"
 path_to_user_group_query_json = "/app/mock_data/userGroupQuery.json"
 path_to_users_json = "/app/mock_data/users.json"
 
@@ -40,6 +41,8 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+# Register the api routes blueprints
+app.register_blueprint(pubs_routes, url_prefix="/v1/api")
 
 @app.route("/test", methods=["GET"])
 def do():
@@ -82,15 +85,6 @@ def get_groups():
         return create_success_json({"groups": groups_data}, "get groups mock data loaded")
     else:
         return create_success_json({"groups": groups_data}, "get groups mysql data loaded")
-
-
-@app.route("/api/pubs", methods=["GET"])
-def get_pubs():
-    pubs_data = get_table_data(Pub, path_to_pubs_json)
-    if MOCK_MODE:
-        return create_success_json({"pubs": pubs_data}, "get pubs mock data loaded")
-    else:
-        return create_success_json({"pubs": pubs_data}, "get pubs mysql data loaded")
 
 
 @app.route("/api/user-group-query", methods=["GET"])
