@@ -1,4 +1,8 @@
 [
-    {"groupId": "9be4ba8f-0109-49d0-9770-999c47f3d568", "userIds":["f7714866-6c92-4ade-83f1-e3172ab6ece8","g7714866-6c92-4ade-83f1-e3172ab6ece9","h7714866-6c92-4ade-83f1-e3172ab6ec10","i7714866-6c92-4ade-83f1-e3172ab6ec11"]},
-    {"groupId": "8be4ba8f-0109-49d0-9770-999c47f3d567", "rating":["f7714866-6c92-4ade-83f1-e3172ab6ece8","g7714866-6c92-4ade-83f1-e3172ab6ece9"]}
+    {"id": "1", "user_id": "f77148666c924ade83f1e3172ab6ece8", "group_id": "9be4ba8f010949d09770999c47f3d568"},
+    {"id": "2", "user_id": "g77148666c924ade83f1e3172ab6ece9", "group_id": "9be4ba8f010949d09770999c47f3d568"},
+    {"id": "3", "user_id": "h77148666c924ade83f1e3172ab6ec10", "group_id": "9be4ba8f010949d09770999c47f3d568"},
+    {"id": "4", "user_id": "i77148666c924ade83f1e3172ab6ec11", "group_id": "9be4ba8f010949d09770999c47f3d568"},
+    {"id": "5", "user_id": "f77148666c924ade83f1e3172ab6ece8", "group_id": "8be4ba8f010949d09770999c47f3d567"},
+    {"id": "6", "user_id": "g77148666c924ade83f1e3172ab6ece9", "group_id": "8be4ba8f010949d09770999c47f3d567"}
 ]

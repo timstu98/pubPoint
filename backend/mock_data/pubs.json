@@ -1,4 +1,4 @@
 [
-    {"pubId": "ad85fd06-c61a-4203-82e2-f7780b885b73", "rating":9.9},
-    {"pubId": "a1b04ed1-8f26-4323-8b35-ebfbdc0128a5", "rating":3.5}
+    {"id": "ad85fd06c61a420382e2f7780b885b73", "rating":9.9},
+    {"id": "a1b04ed18f2643238b35ebfbdc0128a5", "rating":3.5}
 ]
