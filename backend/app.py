@@ -4,6 +4,8 @@ from requests import Response
 from models import db  # User
 import json
 from flask_sqlalchemy import SQLAlchemy
+
+# from flask_migrate import Migrate
 import requests  # For geocoding API
 import os
 from dotenv import load_dotenv
@@ -29,6 +31,7 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
+# migrate = Migrate(app, db)
 
 
 @app.route("/test", methods=["GET"])
@@ -155,3 +158,28 @@ def get_journey_times():
         journey_time = response.json()
         journey_times.append(journey_time)
     return jsonify(journey_times), 200
+
+
+def get_place_data(query):
+    # Google Maps API configuration
+    url = "https://places.googleapis.com/v1/places:searchText"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": API_KEY,
+        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.priceLevel",
+    }
+    data = {"textQuery": query}
+
+    response = requests.post(url, json=data, headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(response.json()["error"]["message"])
+        return jsonify({"error": "Failed to retrieve journey time"}), 500
+
+
+@app.route("/utils/populate-pubs", methods=["PUT"])
+def populate_pubs():
+    # Get pub data from Google Maps API
+    pub_data = get_place_data("pubs in London")
+    return pub_data
