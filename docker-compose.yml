@@ -12,7 +12,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     volumes:
         - ./backend:/app/
 
@@ -47,6 +48,11 @@ services:
       - "3307:3306"                      # Expose MySQL port for local access
     volumes:
       - mysql_data:/var/lib/mysql        # Volume for persistent data
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 
 volumes:

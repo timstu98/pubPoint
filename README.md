@@ -5,12 +5,18 @@ X add actual data to myswl db -> the jsons are not necessary if i can load it up
 X Work on the core algorithm - take current progress and build the required parts for pubs + graphs beign moved. On this, mayve just go for the graph thing, find a leetcode solution and just start from there. How does KNN even work?
 
 
+
+
 # pubPoint
 pubPoint app
 
 So npm run dev
 npm install 
 within frontend
+
+## Note on docker-compose
+### Volumes
+docker-compose down --volumes will delte all volumes, including mysql data 
 
 
 
