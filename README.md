@@ -39,25 +39,25 @@ I can view my mysql db through Mysql workbench. I have got this successfully tes
 I had the front end and backend both successfully returning.
 
 To do:
-properly sety up .env
+DONE - properly sety up .env 
 change .env info for db.
-properly hide all the info through .enc - currently with varying levels of success have some stuff hideen but others hard coded in.
-Clean out the flask + react folders. -> create new branch when doing this to not rock boat.
-Set up initial databse schemas in mysql
-Work out how to add initial info to mysql
-set up postman area
+DONE - properly hide all the info through .enc - currently with varying levels of success have some stuff hideen but others hard coded in.
+DONE - Clean out the flask + react folders. -> create new branch when doing this to not rock boat.
+DONE - Set up initial databse schemas in mysql
+DONE - Work out how to add initial info to mysql
+DONE - set up postman area
 make plan for api
-do i need to put api in one folder and then other non-api backend functions somewhere ekse? does this not make sense actually, you just put everything in the api is ideal
+DONE - do i need to put api in one folder and then other non-api backend functions somewhere ekse? does this not make sense actually, you just put everything in the api is ideal
 Go through other things like tsconfigs etc and check all good. Similar iwht node_modules shortcuts etc. Should i have node_modules in the frontend? Does that make sense? maybe not
 .gitignores
 clangd shit??
 
 Actual plan:
-1. Make a new git branch
-2. Clear out folders
-3. Add initial data to mysql (learn)
-4. Make mysql mock for backend sending back json addresses
-5. get return centre working
+1. DONE - Make a new git branch
+2. DONE - Clear out folders
+3. DONE - Add initial data to mysql (learn)
+4. DONE -  Make mysql mock for backend sending back json addresses
+5. DONE - get return centre working
 ....
 
 PROPER WEBSITE PLAN
