@@ -160,26 +160,39 @@ def get_journey_times():
     return jsonify(journey_times), 200
 
 
+# @TODO(TS): Improve function to return full number of pubs desired
 def get_place_data(query):
     # Google Maps API configuration
     url = "https://places.googleapis.com/v1/places:searchText"
     headers = {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": API_KEY,
-        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.priceLevel",
+        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,nextPageToken",
     }
-    data = {"textQuery": query}
 
-    response = requests.post(url, json=data, headers=headers)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.json()["error"]["message"])
-        return jsonify({"error": "Failed to retrieve journey time"}), 500
+    data = {"textQuery": query, "pageSize": 20}
+    number_results = 200  # Move constant to a better location or use a variable
+    number_pages = number_results // 20
+
+    places_json = {"places": []}
+    while len(places_json["places"]) < number_results:
+        response = requests.post(url, json=data, headers=headers)
+        if "nextPageToken" in response.json() and response.status_code == 200:
+            places_json["places"].extend(response.json()["places"])
+            data["pageToken"] = response.json()["nextPageToken"]
+        elif response.status_code == 200:
+            places_json["places"].extend(response.json()["places"])
+            print("Number of pubs requested: ", number_results)
+            print(f"Number of pubs found: {len(places_json["places"])} - {number_results/len(places_json['places'])}%")
+            return places_json
+        else:
+            print(f"{response.json()["error"]["message"]}")
+            return jsonify({"error": f"Failed to retrieve journey time on page no {i}"}), 500
+    return places_json
 
 
 @app.route("/utils/populate-pubs", methods=["PUT"])
 def populate_pubs():
     # Get pub data from Google Maps API
     pub_data = get_place_data("pubs in London")
-    return pub_data
+    return jsonify(pub_data)
