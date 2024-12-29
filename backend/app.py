@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, jsonify
 from requests import Response
 
-from models import db  # User
+from models import db, Pub  # User
 import json
 from flask_sqlalchemy import SQLAlchemy
+
+# from flask_migrate import Migrate
 import requests  # For geocoding API
 import os
 from dotenv import load_dotenv
@@ -12,11 +14,6 @@ import time
 
 ### Env variables
 load_dotenv(dotenv_path="/app/.env")
-MOCK_MODE = os.getenv("MOCK_MODE", "true").lower() == "true"
-groups_json = "/app/mock_data/groups.json"
-pubs_json = "/app/mock_data/pubs.json"
-user_group_query_json = "/app/mock_data/userGroupQuery.json"
-users_json = "/app/mock_data/users.json"
 # Get database connection details from environment variables
 db_user = os.getenv("MYSQL_USER", "user")
 db_password = os.getenv("MYSQL_PASSWORD", "password")
@@ -24,11 +21,24 @@ db_host = os.getenv("MYSQL_HOST", "mysql")  # "mysql" refers to the container na
 db_name = os.getenv("MYSQL_DATABASE", "db_name")
 # Get other enviroment variables
 API_KEY = os.getenv("API_KEY", "api_key")
+MOCK_MODE = os.getenv("MOCK_MODE", "true").lower() == "true"
+OUTPUT_PUBS_JSON = os.getenv("OUTPUT_JSON", "true").lower() == "true"
+
+
+# Mock data paths
+path_to_groups_json = "/app/mock_data/groups.json"
+path_to_pubs_json = "/app/mock_data/pubs.json"
+path_to_user_group_query_json = "/app/mock_data/userGroupQuery.json"
+path_to_users_json = "/app/mock_data/users.json"
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
+# migrate = Migrate(app, db)
+
+with app.app_context():
+    db.create_all()
 
 
 @app.route("/test", methods=["GET"])
@@ -36,30 +46,34 @@ def do():
     return "Hello, world!"
 
 
-def load_mock_json(mock_json):
-    with open(mock_json) as file:
+def load_mock_json(path_to_mock_json):
+    with open(path_to_mock_json) as file:
         data = json.load(file)
     return jsonify(data)
 
 
 @app.route("/api/groups", methods=["GET"])
 def get_groups():
-    return load_mock_json(groups_json)
+    if MOCK_MODE:
+        return load_mock_json(path_to_groups_json)
 
 
 @app.route("/api/pubs", methods=["GET"])
 def get_pubs():
-    return load_mock_json(pubs_json)
+    if MOCK_MODE:
+        return load_mock_json(path_to_pubs_json)
 
 
 @app.route("/api/user-group-query", methods=["GET"])
 def get_user_group_query():
-    return load_mock_json(user_group_query_json)
+    if MOCK_MODE:
+        return load_mock_json(path_to_user_group_query_json)
 
 
 @app.route("/api/users", methods=["GET"])
 def get_users():
-    return load_mock_json(users_json)
+    if MOCK_MODE:
+        return load_mock_json(path_to_users_json)
 
 
 # Geocode function to convert addresses to coordinates
@@ -155,3 +169,78 @@ def get_journey_times():
         journey_time = response.json()
         journey_times.append(journey_time)
     return jsonify(journey_times), 200
+
+
+# TODO(@TS): Improve function to return full number of pubs desired
+def get_place_data(query):
+    # Google Maps API configuration
+    url = "https://places.googleapis.com/v1/places:searchText"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": API_KEY,
+        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,nextPageToken",
+    }
+    data = {"textQuery": query, "pageSize": 20}
+
+    number_results = 200  # TODO(@TS): Move constant to a better location or use a variable
+    places_json = {"places": []}
+    while len(places_json["places"]) < number_results:
+        response = requests.post(url, json=data, headers=headers)
+        if "nextPageToken" in response.json() and response.status_code == 200:
+            places_json["places"].extend(response.json()["places"])
+            data["pageToken"] = response.json()["nextPageToken"]
+        elif response.status_code == 200:
+            places_json["places"].extend(response.json()["places"])
+            print("Number of pubs requested: ", number_results)
+            print(f"Number of pubs found: {len(places_json["places"])} - {number_results/len(places_json['places'])}%")
+            return places_json
+        else:
+            print(f"{response.json()["error"]["message"]}")
+            return jsonify({"error": f"Failed to retrieve journey time on page no {i}"}), 500
+    return places_json
+
+
+@app.route("/utils/populate-pubs", methods=["PUT"])
+def populate_pubs():
+    # Clear existing data
+    # Pub.query.delete()
+
+    # Get pub data from Google Maps API
+    pub_data = get_place_data("pubs in London")
+
+    duplicates = 0
+    for result in pub_data["places"]:
+        pub = Pub(name=result["displayName"]["text"], address=result["formattedAddress"])
+        try:
+            db.session.add(pub)
+        except IntegrityError as e:
+            db.session.rollback()  # Rollback to clear the session state
+            print(f"Skipping invalid item: {pub}. Error: {e}")
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            duplicates += 1
+
+    if duplicates:
+        print(f"Skipped {duplicates} duplicates")
+
+    # Use batch comitting when peformance is critical and errors are rare.
+    # try:
+    #     db.session.commit()
+    # except Exception as e:
+    #     db.session.rollback()
+    #     print(f"Failed to commit changes. Error: {e}")
+
+    output = {"allPubs": []}
+    for pub in Pub.query.all():
+        output_pub = {}
+        output_pub["id"] = pub.id
+        output_pub["name"] = pub.name
+        output_pub["address"] = pub.address
+        output["allPubs"].append(output_pub)
+
+    output["message"] = (
+        f"Pubs successfully populated - number added {len(pub_data["places"])-duplicates} - duplicates {duplicates} - total in table {len(output['allPubs'])}"
+    )
+    return jsonify(output), 200
