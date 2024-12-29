@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from requests import Response
 
-from models import db  # User
+from models import db, Pub  # User
 import json
 from flask_sqlalchemy import SQLAlchemy
 
@@ -32,6 +32,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 # migrate = Migrate(app, db)
+
+with app.app_context():
+    db.create_all()
 
 
 @app.route("/test", methods=["GET"])
@@ -160,7 +163,7 @@ def get_journey_times():
     return jsonify(journey_times), 200
 
 
-# @TODO(TS): Improve function to return full number of pubs desired
+# TODO(@TS): Improve function to return full number of pubs desired
 def get_place_data(query):
     # Google Maps API configuration
     url = "https://places.googleapis.com/v1/places:searchText"
@@ -169,11 +172,9 @@ def get_place_data(query):
         "X-Goog-Api-Key": API_KEY,
         "X-Goog-FieldMask": "places.displayName,places.formattedAddress,nextPageToken",
     }
-
     data = {"textQuery": query, "pageSize": 20}
-    number_results = 200  # Move constant to a better location or use a variable
-    number_pages = number_results // 20
 
+    number_results = 200  # TODO(@TS): Move constant to a better location or use a variable
     places_json = {"places": []}
     while len(places_json["places"]) < number_results:
         response = requests.post(url, json=data, headers=headers)
@@ -193,6 +194,36 @@ def get_place_data(query):
 
 @app.route("/utils/populate-pubs", methods=["PUT"])
 def populate_pubs():
+    # Clear existing data
+    # Pub.query.delete()
+
     # Get pub data from Google Maps API
     pub_data = get_place_data("pubs in London")
-    return jsonify(pub_data)
+
+    duplicates = 0
+    for result in pub_data["places"]:
+        pub = Pub(name=result["displayName"]["text"], address=result["formattedAddress"])
+        try:
+            db.session.add(pub)
+        except IntegrityError as e:
+            db.session.rollback()  # Rollback to clear the session state
+            print(f"Skipping invalid item: {pub}. Error: {e}")
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            duplicates += 1
+
+    if duplicates:
+        print(f"Skipped {duplicates} duplicates")
+
+    # Ue batch comitting when peformance is critical and errors are rare.
+    # try:
+    #     db.session.commit()
+    # except Exception as e:
+    #     db.session.rollback()
+    #     print(f"Failed to commit changes. Error: {e}")
+
+    output = pub_data.copy()
+    output["message"] = f"Pubs successfully populated - number added {len(pub_data["places"])-duplicates} - duplicates {duplicates}"
+    return jsonify(output), 200
