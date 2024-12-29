@@ -14,11 +14,6 @@ import time
 
 ### Env variables
 load_dotenv(dotenv_path="/app/.env")
-MOCK_MODE = os.getenv("MOCK_MODE", "true").lower() == "true"
-path_to_groups_json = "/app/mock_data/groups.json"
-path_to_pubs_json = "/app/mock_data/pubs.json"
-path_to_user_group_query_json = "/app/mock_data/userGroupQuery.json"
-path_to_users_json = "/app/mock_data/users.json"
 # Get database connection details from environment variables
 db_user = os.getenv("MYSQL_USER", "user")
 db_password = os.getenv("MYSQL_PASSWORD", "password")
@@ -26,6 +21,15 @@ db_host = os.getenv("MYSQL_HOST", "mysql")  # "mysql" refers to the container na
 db_name = os.getenv("MYSQL_DATABASE", "db_name")
 # Get other enviroment variables
 API_KEY = os.getenv("API_KEY", "api_key")
+MOCK_MODE = os.getenv("MOCK_MODE", "true").lower() == "true"
+OUTPUT_PUBS_JSON = os.getenv("OUTPUT_JSON", "true").lower() == "true"
+
+
+# Mock data paths
+path_to_groups_json = "/app/mock_data/groups.json"
+path_to_pubs_json = "/app/mock_data/pubs.json"
+path_to_user_group_query_json = "/app/mock_data/userGroupQuery.json"
+path_to_users_json = "/app/mock_data/users.json"
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}"
@@ -229,5 +233,8 @@ def populate_pubs():
     #     print(f"Failed to commit changes. Error: {e}")
 
     output = pub_data.copy()
+    for pub in output["places"]:
+        print(pub)
+        pub["displayName"] = pub["displayName"]["text"]
     output["message"] = f"Pubs successfully populated - number added {len(pub_data["places"])-duplicates} - duplicates {duplicates}"
     return jsonify(output), 200
