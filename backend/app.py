@@ -225,16 +225,22 @@ def populate_pubs():
     if duplicates:
         print(f"Skipped {duplicates} duplicates")
 
-    # Ue batch comitting when peformance is critical and errors are rare.
+    # Use batch comitting when peformance is critical and errors are rare.
     # try:
     #     db.session.commit()
     # except Exception as e:
     #     db.session.rollback()
     #     print(f"Failed to commit changes. Error: {e}")
 
-    output = pub_data.copy()
-    for pub in output["places"]:
-        print(pub)
-        pub["displayName"] = pub["displayName"]["text"]
-    output["message"] = f"Pubs successfully populated - number added {len(pub_data["places"])-duplicates} - duplicates {duplicates}"
+    output = {"allPubs": []}
+    for pub in Pub.query.all():
+        output_pub = {}
+        output_pub["id"] = pub.id
+        output_pub["name"] = pub.name
+        output_pub["address"] = pub.address
+        output["allPubs"].append(output_pub)
+
+    output["message"] = (
+        f"Pubs successfully populated - number added {len(pub_data["places"])-duplicates} - duplicates {duplicates} - total in table {len(output['allPubs'])}"
+    )
     return jsonify(output), 200
