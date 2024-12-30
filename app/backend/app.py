@@ -13,6 +13,7 @@ import pymysql  # Make sure to include pymysql or another MySQL driver in requir
 import time
 
 from api.routes.pubs_routes import pubs_routes
+from api.routes.users_routes import users_routes
 
 ### Env variables
 load_dotenv(dotenv_path="/app/.env")
@@ -43,6 +44,7 @@ with app.app_context():
 
 # Register the api routes blueprints
 app.register_blueprint(pubs_routes, url_prefix="/v1/api")
+app.register_blueprint(users_routes, url_prefix="/v1/api")
 
 @app.route("/test", methods=["GET"])
 def do():
@@ -94,15 +96,6 @@ def get_user_group_query():
         return create_success_json({"userGroupQuerys": user_group_query_data}, "get user group query mock data loaded")
     else:
         return create_success_json({"userGroupQuerys": user_group_query_data}, "get user group query mysql data loaded")
-
-
-@app.route("/api/users", methods=["GET"])
-def get_users():
-    users_data = get_table_data(User, path_to_users_json)
-    if MOCK_MODE:
-        return create_success_json({"pubs": users_data}, "get users mock data loaded")
-    else:
-        return create_success_json({"pubs": users_data}, "get users mysql data loaded")
 
 
 # Geocode function to convert addresses to coordinates

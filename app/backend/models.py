@@ -52,4 +52,8 @@ class User(db.Model):
     second_name = db.Column(db.String(150), nullable=False)
 
     def get_as_dict(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+        return {
+            "id": self.id,
+            "type": "user",
+            "attributes": {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs if c.key != "id"},
+        }
