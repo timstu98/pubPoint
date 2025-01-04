@@ -1,111 +1,96 @@
-Start Christmas new plan:
-
-X add actual data to myswl db -> the jsons are not necessary if i can load it up to volume
-
-X Work on the core algorithm - take current progress and build the required parts for pubs + graphs beign moved. On this, mayve just go for the graph thing, find a leetcode solution and just start from there. How does KNN even work?
 
 
 
 
 # pubPoint
-pubPoint app
 
-So npm run dev
-npm install 
-within frontend
+*Add problem + solution explanation when app is in production.*
 
-## Note on docker-compose
-### Volumes
-docker-compose down --volumes will delte all volumes, including mysql data 
+## Running project
+App has been broken into 3 different docker images (frontend, backend and mysql db). Docker-compose has been set-up to allow the quick spin up and spin down of containers.
 
+### To build containers
+`docker-compose up --build`
 
+### To spin up
+`docker-compose up`
 
-So, shouldnt be pusghing up noide_modules. Deleted front-end. 
-pkg-config \
+### To spin down
+`docker-compose down`
 
-clever clouud for db\
-azimutt pop the uri in and then it works and can view data
-https://azimutt.app/00000000-0000-0000-0000-000000000000/00000000-0000-0000-0000-000000000000
+### To delete mysql data
+`docker-compose down —-volumes`
 
-NEW AS OF NOVEMBER 2024
+## Contributing
+Hot reload has been enabled on both front and backend.
 
-I have got lots of things set-up. I should create a main 
+Docker desktop must be opened before running `docker-compose up`.
 
-RUNNING CODE
+Recommend forking the project for initial experimentation. When ready to contribute, write access to the main repo can be set-up.
 
-I need to have docker desktop open. I click on the docker dektop link to access the port. 
-I have hot reload on both front end and backend. I should do docker-compose up --build for rebuilding containers and docker-compose up for turning on without rebuild.
-I can view my mysql db through Mysql workbench. I have got this successfully testing.
-I had the front end and backend both successfully returning.
+### Mock Mode
 
-To do:
-properly sety up .env
-change .env info for db.
-properly hide all the info through .enc - currently with varying levels of success have some stuff hideen but others hard coded in.
-Clean out the flask + react folders. -> create new branch when doing this to not rock boat.
-Set up initial databse schemas in mysql
-Work out how to add initial info to mysql
-set up postman area
-make plan for api
-do i need to put api in one folder and then other non-api backend functions somewhere ekse? does this not make sense actually, you just put everything in the api is ideal
-Go through other things like tsconfigs etc and check all good. Similar iwht node_modules shortcuts etc. Should i have node_modules in the frontend? Does that make sense? maybe not
-.gitignores
-clangd shit??
+When wanting to use local dev mysql database edit .env to have MOCK_MODE=true (capitalisation is not important).
 
-Actual plan:
-1. Make a new git branch
-2. Clear out folders
-3. Add initial data to mysql (learn)
-4. Make mysql mock for backend sending back json addresses
-5. get return centre working
-....
-
-PROPER WEBSITE PLAN
-
-If I was doing it properly:
-
-First think about whether doing app or website
-I would wireframe the website
-I would therefore decided on pages
-
-I would then make tickets (troll/kanban thing somewhere)
-I would get some data in my databse
+This is persistent between container spin up and spin down due to image volume storage. This can be cleared using the above given command `docker-compose down —-volumes`.
 
 
-An aside, treat for template
+### Template .env
 
-Which order of attack shall I go for? Backend first maybe, so I can serve it up. 
+Template .env file provided called ".env.template". Placeholder values have been added for the variables and these should be updated.
 
-Core Features:
-Get a landing page showing a map
-Allow multiple peoples adfresses to be inputted
-Have an api where I can send stuff -> plan this a bit first
+To update:
 
-Rough Architecture:
+1. `cp .env.template  .env`
 
-To dos:
+1. Update values. Mock database set-up as desired (recommend to leave as placeholder valies). API KEY look at below instructions for google developer api set-up. 
 
+### To populate local mysql storage
 
-Down the line:
-Proper user data base
-Proper 
+I have set-up various utils endpoints to populate the dev local mysql tables for the persistent container volume storage.
 
+To populate pubs: postman has populate pubs endpoint set-up. Will load in London pubs. Endpoint is http://localhost:5001/utils/populate-pubs with a PUT request.
 
-So have an api call where you give multiple addresses, and it gives you the centre point of these people. 
+### Contributing check-list
 
-	•	Core Features: What’s the one thing you want working first?
-	•	Rough Architecture: High-level decisions like tech stack and basic data flow.
-	•	Basic To-Dos: A simple list of tasks for the next few days or weeks.
+* Google developer account with activated api key added to .env.
+
+* Set up ".env".
+
+* Docker Desktop installed.
+
+* Postman (ask TS to be added to repo for existing endpoints).
+
+* Access to notion (ask to be added, contains planning info).
+
+* Access to github (obviously). When ready to contribute, write access to the main repo can be set-up.
+
+* Docker-compose file shows the host ports for accessing containers.
+
+* MySql workbench for viewing databse.
+
+### Google developer API set-up
+1. Head to "https://console.cloud.google.com/welcome".
+
+1. APIs and services.
+
+1. Credentials.
+
+1. CREATE CREDENTIALS (towards top), Api Key.
+
+1.   Recommended, set up restrictions → click 3 dots, go to edit, restrict key to selected api, needed ones are “Routes API” and “Places API (New)”. 
+
+1. Add this to .env, I have provided template .env for this, DO NOT HARD CODE INTO CHECKED IN FILES.
+
+### MySQL workbench set-up
+
+![MySQL Workbench set-up](./readme_images/MySQL_Workbench.png)
+
+### Contributing Software Process
+
+Add an `epic/your-feature` branch. Merge into `main` using a PR. Commits should be atomic. Tag commits in `main` with version for release.
 
 
 
-Previous commands to run both together using concurrently
-    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
-    "start:frontend": "cd frontend && npm run dev",
-    "start:backend": "cd backend && source venv/bin/Activate && flask run --debug"
 
 
-
-Routes Api:
-IO have chosen to use the v2 routes api as updated. 
-https://console.cloud.google.com/apis/library/routes.googleapis.com?project=eng-archery-442218-t3 -> go here to enable your api, maybe just for my accopunt or whatevcrtr 

@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from requests import Response
 
-from models import db, Pub  # User
+from models import db, Pub, Group, User, UserGroupQuery
 import json
 from flask_sqlalchemy import SQLAlchemy
 
@@ -49,31 +49,66 @@ def do():
 def load_mock_json(path_to_mock_json):
     with open(path_to_mock_json) as file:
         data = json.load(file)
-    return jsonify(data)
+    return data
+
+
+def create_success_json(data_dict, message=""):
+    return jsonify({"status": "success", "data": data_dict, "message": message, "metadata": {"timestamp": time.strftime("%Y-%m-%dT%H:%M:%S")}})
+
+
+def create_error_json(error_code, type=None, message=""):
+    return jsonify(
+        {
+            "status": "error",
+            "error": {"error_code": error_code, "type": type},
+            "message": message,
+            "metadata": {"timestamp": time.strftime("%Y-%m-%dT%H:%M:%S")},
+        }
+    )
+
+
+def get_table_data(table_object, path_to_mock_json):
+    if MOCK_MODE:
+        return load_mock_json(path_to_mock_json)
+    else:
+        table_data = table_object.query.all()
+        return [item.get_as_dict() for item in table_data]
 
 
 @app.route("/api/groups", methods=["GET"])
 def get_groups():
+    groups_data = get_table_data(Group, path_to_groups_json)
     if MOCK_MODE:
-        return load_mock_json(path_to_groups_json)
+        return create_success_json({"groups": groups_data}, "get groups mock data loaded")
+    else:
+        return create_success_json({"groups": groups_data}, "get groups mysql data loaded")
 
 
 @app.route("/api/pubs", methods=["GET"])
 def get_pubs():
+    pubs_data = get_table_data(Pub, path_to_pubs_json)
     if MOCK_MODE:
-        return load_mock_json(path_to_pubs_json)
+        return create_success_json({"pubs": pubs_data}, "get pubs mock data loaded")
+    else:
+        return create_success_json({"pubs": pubs_data}, "get pubs mysql data loaded")
 
 
 @app.route("/api/user-group-query", methods=["GET"])
 def get_user_group_query():
+    user_group_query_data = get_table_data(UserGroupQuery, path_to_user_group_query_json)
     if MOCK_MODE:
-        return load_mock_json(path_to_user_group_query_json)
+        return create_success_json({"userGroupQuerys": user_group_query_data}, "get user group query mock data loaded")
+    else:
+        return create_success_json({"userGroupQuerys": user_group_query_data}, "get user group query mysql data loaded")
 
 
 @app.route("/api/users", methods=["GET"])
 def get_users():
+    users_data = get_table_data(User, path_to_users_json)
     if MOCK_MODE:
-        return load_mock_json(path_to_users_json)
+        return create_success_json({"pubs": users_data}, "get users mock data loaded")
+    else:
+        return create_success_json({"pubs": users_data}, "get users mysql data loaded")
 
 
 # Geocode function to convert addresses to coordinates
@@ -99,12 +134,10 @@ def calculate_centre(coordinates):
 
 @app.route("/api/get-centre", methods=["POST"])
 def get_centre():
-    response = get_users().get_json()
-    for user in response:
-        print(user["address"])
+    users = get_table_data(User, path_to_users_json)
 
     coordinates = []
-    for item in response:
+    for item in users:
         coords = geocode_address(item["address"])
         if coords:
             coordinates.append(coords)
@@ -157,12 +190,12 @@ def get_journey_time():
 
 @app.route("/api/get-journey-times", methods=["GET"])
 def get_journey_times():
-    response = get_users().get_json()
+    users = get_table_data(User, path_to_users_json)
     centre_response = get_centre().get_json()
 
     journey_times = []
     url = f"http://localhost:5001/api/get-journey-time"  # Needed due to collection of parmams
-    for user_entry in response:
+    for user_entry in users:
         coords_user = geocode_address(user_entry["address"])
         params = {"origin_lat": coords_user[0], "origin_lng": coords_user[1], "dest_lat": centre_response["lat"], "dest_lng": centre_response["lng"]}
         response = requests.get(url, params=params)
@@ -192,7 +225,7 @@ def get_place_data(query):
         elif response.status_code == 200:
             places_json["places"].extend(response.json()["places"])
             print("Number of pubs requested: ", number_results)
-            print(f"Number of pubs found: {len(places_json["places"])} - {number_results/len(places_json['places'])}%")
+            print(f"Number of pubs found: {len(places_json["places"])} ({100*len(places_json['places'])/number_results}%)")
             return places_json
         else:
             print(f"{response.json()["error"]["message"]}")
