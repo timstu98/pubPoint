@@ -17,7 +17,7 @@ class Pub(db.Model):
     address = db.Column(db.String(250), nullable=False)
 
     def get_as_dict(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+        return {"id": self.id, "type": "pub", "attributes": {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs if c.key != "id"}}
 
 
 class Group(db.Model):
@@ -28,7 +28,11 @@ class Group(db.Model):
     suggested_pub = db.relationship("Pub", backref="groups")
 
     def get_as_dict(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+        return {
+            "id": self.id,
+            "type": "group",
+            "attributes": {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs if c.key != "id"},
+        }
 
 
 class UserGroupQuery(db.Model):
@@ -41,7 +45,11 @@ class UserGroupQuery(db.Model):
     group = db.relationship("Group", backref=db.backref("usergroupquery", lazy=True))
 
     def get_as_dict(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+        return {
+            "id": self.id,
+            "type": "userGroupQuery",
+            "attributes": {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs if c.key != "id"},
+        }
 
 
 class User(db.Model):
@@ -52,4 +60,8 @@ class User(db.Model):
     second_name = db.Column(db.String(150), nullable=False)
 
     def get_as_dict(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+        return {
+            "id": self.id,
+            "type": "user",
+            "attributes": {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs if c.key != "id"},
+        }

@@ -1,3 +1,12 @@
+# Environment variables
 .env
+*.env
+
+# System files
 .DS_STORE
-app/backend/expected_response_formats.txt
+
+# Project specific
+app/backend/external_api_expected_response_formats.txt
+modelling/venv_modelling
+Planning Documents/
+modelling/venv_modelling
