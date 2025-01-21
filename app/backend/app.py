@@ -14,6 +14,7 @@ import time
 
 from api.routes.pubs_routes import pubs_routes
 from api.routes.users_routes import users_routes
+from api.routes.groups_routes import groups_routes
 from api.routes.user_group_queries_routes import user_group_queries_routes
 
 ### Env variables
@@ -46,6 +47,7 @@ with app.app_context():
 # Register the api routes blueprints
 app.register_blueprint(pubs_routes, url_prefix="/v1/api")
 app.register_blueprint(users_routes, url_prefix="/v1/api")
+app.register_blueprint(groups_routes, url_prefix="/v1/api")
 app.register_blueprint(user_group_queries_routes, url_prefix="/v1/api")
 
 @app.route("/test", methods=["GET"])
@@ -59,36 +61,12 @@ def load_mock_json(path_to_mock_json):
     return data
 
 
-def create_success_json(data_dict, message=""):
-    return jsonify({"status": "success", "data": data_dict, "message": message, "metadata": {"timestamp": time.strftime("%Y-%m-%dT%H:%M:%S")}})
-
-
-def create_error_json(error_code, type=None, message=""):
-    return jsonify(
-        {
-            "status": "error",
-            "error": {"error_code": error_code, "type": type},
-            "message": message,
-            "metadata": {"timestamp": time.strftime("%Y-%m-%dT%H:%M:%S")},
-        }
-    )
-
-
 def get_table_data(table_object, path_to_mock_json):
     if MOCK_MODE:
         return load_mock_json(path_to_mock_json)
     else:
         table_data = table_object.query.all()
         return [item.get_as_dict() for item in table_data]
-
-
-@app.route("/api/groups", methods=["GET"])
-def get_groups():
-    groups_data = get_table_data(Group, path_to_groups_json)
-    if MOCK_MODE:
-        return create_success_json({"groups": groups_data}, "get groups mock data loaded")
-    else:
-        return create_success_json({"groups": groups_data}, "get groups mysql data loaded")
 
 
 # Geocode function to convert addresses to coordinates

@@ -28,7 +28,11 @@ class Group(db.Model):
     suggested_pub = db.relationship("Pub", backref="groups")
 
     def get_as_dict(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+        return {
+            "id": self.id,
+            "type": "group",
+            "attributes": {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs if c.key != "id"},
+        }
 
 
 class UserGroupQuery(db.Model):
