@@ -41,7 +41,11 @@ class UserGroupQuery(db.Model):
     group = db.relationship("Group", backref=db.backref("usergroupquery", lazy=True))
 
     def get_as_dict(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+        return {
+            "id": self.id,
+            "type": "userGroupQuery",
+            "attributes": {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs if c.key != "id"},
+        }
 
 
 class User(db.Model):

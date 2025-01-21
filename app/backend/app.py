@@ -14,6 +14,7 @@ import time
 
 from api.routes.pubs_routes import pubs_routes
 from api.routes.users_routes import users_routes
+from api.routes.user_group_queries_routes import user_group_queries_routes
 
 ### Env variables
 load_dotenv(dotenv_path="/app/.env")
@@ -45,6 +46,7 @@ with app.app_context():
 # Register the api routes blueprints
 app.register_blueprint(pubs_routes, url_prefix="/v1/api")
 app.register_blueprint(users_routes, url_prefix="/v1/api")
+app.register_blueprint(user_group_queries_routes, url_prefix="/v1/api")
 
 @app.route("/test", methods=["GET"])
 def do():
@@ -87,15 +89,6 @@ def get_groups():
         return create_success_json({"groups": groups_data}, "get groups mock data loaded")
     else:
         return create_success_json({"groups": groups_data}, "get groups mysql data loaded")
-
-
-@app.route("/api/user-group-query", methods=["GET"])
-def get_user_group_query():
-    user_group_query_data = get_table_data(UserGroupQuery, path_to_user_group_query_json)
-    if MOCK_MODE:
-        return create_success_json({"userGroupQuerys": user_group_query_data}, "get user group query mock data loaded")
-    else:
-        return create_success_json({"userGroupQuerys": user_group_query_data}, "get user group query mysql data loaded")
 
 
 # Geocode function to convert addresses to coordinates
