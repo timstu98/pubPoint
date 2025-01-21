@@ -21,6 +21,13 @@ App has been broken into 3 different docker images (frontend, backend and mysql 
 ### To delete mysql data
 `docker-compose down —-volumes`
 
+### Running bash inside a container
+`docker exec -it <mycontainer> sh`
+
+## Commonly Encountered Issues
+
+### Populate as issues are found
+
 ## Contributing
 Hot reload has been enabled on both front and backend.
 
