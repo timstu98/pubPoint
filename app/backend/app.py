@@ -5,7 +5,7 @@ from models import db, Pub, Group, User, UserGroupQuery
 import json
 from flask_sqlalchemy import SQLAlchemy
 
-# from flask_migrate import Migrate
+from flask_migrate import Migrate
 import requests  # For geocoding API
 import os
 from dotenv import load_dotenv
@@ -39,7 +39,7 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
-# migrate = Migrate(app, db)
+migrate = Migrate(app, db)
 
 with app.app_context():
     db.create_all()
