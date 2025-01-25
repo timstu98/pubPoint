@@ -26,14 +26,7 @@ db_host = os.getenv("MYSQL_HOST", "mysql")  # "mysql" refers to the container na
 db_name = os.getenv("MYSQL_DATABASE", "db_name")
 # Get other enviroment variables
 API_KEY = os.getenv("API_KEY", "api_key")
-MOCK_MODE = os.getenv("MOCK_MODE", "true").lower() == "true"
 OUTPUT_PUBS_JSON = os.getenv("OUTPUT_JSON", "true").lower() == "true"
-
-
-# Mock data paths
-path_to_groups_json = "/app/mock_data/groups.json"
-path_to_user_group_query_json = "/app/mock_data/userGroupQuery.json"
-path_to_users_json = "/app/mock_data/users.json"
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}"
@@ -50,6 +43,7 @@ app.register_blueprint(users_routes, url_prefix="/v1/api")
 app.register_blueprint(groups_routes, url_prefix="/v1/api")
 app.register_blueprint(user_group_queries_routes, url_prefix="/v1/api")
 
+
 @app.route("/test", methods=["GET"])
 def do():
     return "Hello, world!"
@@ -61,12 +55,9 @@ def load_mock_json(path_to_mock_json):
     return data
 
 
-def get_table_data(table_object, path_to_mock_json):
-    if MOCK_MODE:
-        return load_mock_json(path_to_mock_json)
-    else:
-        table_data = table_object.query.all()
-        return [item.get_as_dict() for item in table_data]
+def get_table_data(table_object):
+    table_data = table_object.query.all()
+    return [item.get_as_dict() for item in table_data]
 
 
 # Geocode function to convert addresses to coordinates
@@ -92,7 +83,7 @@ def calculate_centre(coordinates):
 
 @app.route("/api/get-centre", methods=["POST"])
 def get_centre():
-    users = get_table_data(User, path_to_users_json)
+    users = get_table_data(User)
 
     coordinates = []
     for item in users:
@@ -148,7 +139,7 @@ def get_journey_time():
 
 @app.route("/api/get-journey-times", methods=["GET"])
 def get_journey_times():
-    users = get_table_data(User, path_to_users_json)
+    users = get_table_data(User)
     centre_response = get_centre().get_json()
 
     journey_times = []
