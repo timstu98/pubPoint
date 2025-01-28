@@ -3,8 +3,11 @@ from models import db, Group, User, UserGroupQuery
 from http import HTTPStatus
 from .common import create_success_response, paginate_query, create_error_response, create_error
 from uuid import uuid4
+from services.pub_service import suggest_pub_for_group
+from dotenv import load_dotenv
+import os
 
-# from .services.pub_service import get_optimal_pub_for_group
+ALGORITHM_NAME = os.getenv("ALGORITHM_NAME", "geo-centre")
 
 groups_routes = Blueprint("groups_routes", __name__)
 
@@ -210,3 +213,22 @@ def get_group_users(group_id):
         ),
         HTTPStatus.OK,
     )
+
+
+@groups_routes.route("/groups/<string:group_id>/suggested-pub", methods=["GET"])
+def get_suggested_pub(group_id):
+    algorithm = ALGORITHM_NAME
+
+    try:
+        pub = suggest_pub_for_group(group_id, algorithm)
+        return (
+            jsonify(
+                create_success_response(
+                    data=pub.get_as_dict(),
+                    message="Suggested pub fetched successfully",
+                )
+            ),
+            HTTPStatus.OK,
+        )
+    except Exception as e:
+        return jsonify(create_error_response([create_error("ERROR", str(e))])), HTTPStatus.INTERNAL_SERVER_ERROR
