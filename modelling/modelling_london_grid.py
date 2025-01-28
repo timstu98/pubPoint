@@ -1,4 +1,6 @@
-import matplotlib.pyplot as plt
+import folium
+
+# import matplotlib.pyplot as plt
 from math import pi
 import numpy as np
 import math
@@ -11,9 +13,7 @@ def stretching_fn(normalised_value, aggressivity):
     return math.log(1 - aggressivity * normalised_value) / math.log(1 - aggressivity)
 
 
-if __name__ == "__main__":
-    """Please be aware, the x and y coordinates are swapped around from google maps."""
-
+def elipsis_modelling():
     centre_point = (-0.132653, 51.509408)
     max_x_radius = 0.20  # km, max radius of the x-axis
     max_y_radius = 0.15  # km, max radius of the y-axis
@@ -89,3 +89,64 @@ if __name__ == "__main__":
     Visualise the pubs I have already got on a map.
     Visualise the dots
     """
+
+
+def generate_rectangles(top_left, bottom_right, num_lat_divisions, num_lng_divisions):
+    """
+    Divide an area into smaller rectangles and return their corner coordinates.
+
+    :param top_left: Tuple (lat, lng) of the top-left corner of the overall area.
+    :param bottom_right: Tuple (lat, lng) of the bottom-right corner of the overall area.
+    :param num_lat_divisions: Number of divisions along the latitude axis.
+    :param num_lng_divisions: Number of divisions along the longitude axis.
+    :return: List of rectangles as tuples ((top_left_lat, top_left_lng), (bottom_right_lat, bottom_right_lng)).
+    """
+    top_lat, left_lng = top_left
+    bottom_lat, right_lng = bottom_right
+
+    lat_step = (top_lat - bottom_lat) / num_lat_divisions
+    lng_step = (right_lng - left_lng) / num_lng_divisions
+
+    rectangles = []
+
+    for i in range(num_lat_divisions):
+        for j in range(num_lng_divisions):
+            rect_top_left = (top_lat - i * lat_step, left_lng + j * lng_step)
+            rect_bottom_right = (top_lat - (i + 1) * lat_step, left_lng + (j + 1) * lng_step)
+            rectangles.append((rect_top_left, rect_bottom_right))
+
+    return rectangles
+
+
+def plot_rectangles_on_map(rectangles):
+    # Create a map centered around London
+    m = folium.Map(location=[51.509865, -0.118092], zoom_start=10)
+
+    # Add rectangles to the map
+    for top_left, bottom_right in rectangles:
+        folium.Rectangle(bounds=[top_left, bottom_right], color="blue", fill=True, fill_color="blue", fill_opacity=0.1).add_to(m)
+
+    # Save the map to an HTML file
+    m.save("modelling/london_rectangles.html")
+
+
+def get_rectangles():
+    # Define the bounding box for London (approximate).
+    # These coordinates can be adjusted as needed.
+    london_top_left = (51.6723432, -0.563)
+    london_bottom_right = (51.3849401, 0.278)
+
+    # Set the number of divisions.
+    num_lat_divisions = 8  # Adjust based on desired granularity.
+    num_lng_divisions = 12  # Adjust based on desired granularity.
+
+    # Generate rectangles.
+    rectangles = generate_rectangles(london_top_left, london_bottom_right, num_lat_divisions, num_lng_divisions)
+
+    # Plot rectangles on the map
+    plot_rectangles_on_map(rectangles)
+
+
+if __name__ == "__main__":
+    """Please be aware, the x and y coordinates are swapped around from google maps."""
+    get_rectangles()
