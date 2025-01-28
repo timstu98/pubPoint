@@ -26,14 +26,7 @@ db_host = os.getenv("MYSQL_HOST", "mysql")  # "mysql" refers to the container na
 db_name = os.getenv("MYSQL_DATABASE", "db_name")
 # Get other enviroment variables
 API_KEY = os.getenv("API_KEY", "api_key")
-MOCK_MODE = os.getenv("MOCK_MODE", "true").lower() == "true"
 OUTPUT_PUBS_JSON = os.getenv("OUTPUT_JSON", "true").lower() == "true"
-
-
-# Mock data paths
-path_to_groups_json = "/app/mock_data/groups.json"
-path_to_user_group_query_json = "/app/mock_data/userGroupQuery.json"
-path_to_users_json = "/app/mock_data/users.json"
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}"
@@ -50,6 +43,7 @@ app.register_blueprint(users_routes, url_prefix="/v1/api")
 app.register_blueprint(groups_routes, url_prefix="/v1/api")
 app.register_blueprint(user_group_queries_routes, url_prefix="/v1/api")
 
+
 @app.route("/test", methods=["GET"])
 def do():
     return "Hello, world!"
@@ -61,12 +55,9 @@ def load_mock_json(path_to_mock_json):
     return data
 
 
-def get_table_data(table_object, path_to_mock_json):
-    if MOCK_MODE:
-        return load_mock_json(path_to_mock_json)
-    else:
-        table_data = table_object.query.all()
-        return [item.get_as_dict() for item in table_data]
+def get_table_data(table_object):
+    table_data = table_object.query.all()
+    return [item.get_as_dict() for item in table_data]
 
 
 # Geocode function to convert addresses to coordinates
@@ -92,7 +83,7 @@ def calculate_centre(coordinates):
 
 @app.route("/api/get-centre", methods=["POST"])
 def get_centre():
-    users = get_table_data(User, path_to_users_json)
+    users = get_table_data(User)
 
     coordinates = []
     for item in users:
@@ -148,7 +139,7 @@ def get_journey_time():
 
 @app.route("/api/get-journey-times", methods=["GET"])
 def get_journey_times():
-    users = get_table_data(User, path_to_users_json)
+    users = get_table_data(User)
     centre_response = get_centre().get_json()
 
     journey_times = []
@@ -160,78 +151,3 @@ def get_journey_times():
         journey_time = response.json()
         journey_times.append(journey_time)
     return jsonify(journey_times), 200
-
-
-# TODO(@TS): Improve function to return full number of pubs desired
-def get_place_data(query):
-    # Google Maps API configuration
-    url = "https://places.googleapis.com/v1/places:searchText"
-    headers = {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": API_KEY,
-        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,nextPageToken",
-    }
-    data = {"textQuery": query, "pageSize": 20}
-
-    number_results = 200  # TODO(@TS): Move constant to a better location or use a variable
-    places_json = {"places": []}
-    while len(places_json["places"]) < number_results:
-        response = requests.post(url, json=data, headers=headers)
-        if "nextPageToken" in response.json() and response.status_code == 200:
-            places_json["places"].extend(response.json()["places"])
-            data["pageToken"] = response.json()["nextPageToken"]
-        elif response.status_code == 200:
-            places_json["places"].extend(response.json()["places"])
-            print("Number of pubs requested: ", number_results)
-            print(f"Number of pubs found: {len(places_json["places"])} ({100*len(places_json['places'])/number_results}%)")
-            return places_json
-        else:
-            print(f"{response.json()["error"]["message"]}")
-            return jsonify({"error": f"Failed to retrieve journey time on page no {i}"}), 500
-    return places_json
-
-
-@app.route("/utils/populate-pubs", methods=["PUT"])
-def populate_pubs():
-    # Clear existing data
-    # Pub.query.delete()
-
-    # Get pub data from Google Maps API
-    pub_data = get_place_data("pubs in London")
-
-    duplicates = 0
-    for result in pub_data["places"]:
-        pub = Pub(name=result["displayName"]["text"], address=result["formattedAddress"])
-        try:
-            db.session.add(pub)
-        except IntegrityError as e:
-            db.session.rollback()  # Rollback to clear the session state
-            print(f"Skipping invalid item: {pub}. Error: {e}")
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            duplicates += 1
-
-    if duplicates:
-        print(f"Skipped {duplicates} duplicates")
-
-    # Use batch comitting when peformance is critical and errors are rare.
-    # try:
-    #     db.session.commit()
-    # except Exception as e:
-    #     db.session.rollback()
-    #     print(f"Failed to commit changes. Error: {e}")
-
-    output = {"allPubs": []}
-    for pub in Pub.query.all():
-        output_pub = {}
-        output_pub["id"] = pub.id
-        output_pub["name"] = pub.name
-        output_pub["address"] = pub.address
-        output["allPubs"].append(output_pub)
-
-    output["message"] = (
-        f"Pubs successfully populated - number added {len(pub_data["places"])-duplicates} - duplicates {duplicates} - total in table {len(output['allPubs'])}"
-    )
-    return jsonify(output), 200
