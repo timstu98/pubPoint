@@ -16,13 +16,14 @@ if "/app" not in sys.path:
 load_dotenv(dotenv_path="/app/.env")
 ### Env variables
 # Get database connection details from environment variables
-db_user = os.getenv("MYSQL_USER", "user")
-db_password = os.getenv("MYSQL_PASSWORD", "password")
-db_host = os.getenv("MYSQL_HOST", "mysql")  # "mysql" refers to the container name
-db_name = os.getenv("MYSQL_DATABASE", "db_name")
+DB_USER = os.getenv("MYSQL_USER", "user")
+DB_PASSWORD = os.getenv("MYSQL_PASSWORD", "password")
+DB_HOST = os.getenv("MYSQL_HOST", "mysql")  # "mysql" refers to the container name
+DB_NAME = os.getenv("MYSQL_DATABASE", "DB_NAME")
 # Get other environment variables
 API_KEY = os.getenv("API_KEY", "api_key")
-DATABASE_URI = f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}"
+DATABASE_URI = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
+TEST_FUNCTIONALITY_MODE = os.getenv("TEST_FUNCTIONALITY_MODE", "false").lower() == "true"
 
 
 def get_engine():
@@ -122,6 +123,8 @@ def populate_pubs(top_left, bottom_right, num_lat_divisions, num_lng_divisions):
     duplicates = 0
     for name, address in total_pubs:
         pub = Pub(name=name, address=address)
+        if not TEST_FUNCTIONALITY_MODE:
+            continue
         try:
             db.session.add(pub)
         except IntegrityError as e:
@@ -145,7 +148,7 @@ def populate_pubs(top_left, bottom_right, num_lat_divisions, num_lng_divisions):
     output["message"] = (
         f"Pubs successfully populated - number added {len(total_pubs) - duplicates} - duplicates {duplicates} - total in table {len(output['allPubs'])}"
     )
-    return jsonify(output), 200
+    return jsonify(output)
 
 
 if __name__ == "__main__":
