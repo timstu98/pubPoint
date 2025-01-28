@@ -21,8 +21,19 @@ App has been broken into 3 different docker images (frontend, backend and mysql 
 ### To delete mysql data
 `docker-compose down —-volumes`
 
-### Running bash inside a container
+### Investigating and running code inside a docker container
+
+Running bash inside a container:
+
 `docker exec -it <mycontainer> sh`
+
+eg.
+
+`docker exec -it pubpoint-backend-1 sh`
+
+I have made various bash scripts which give other ways of running code inside a docker container (see `populate_pubs.sh` as an example).
+
+###
 
 ## Commonly Encountered Issues
 
