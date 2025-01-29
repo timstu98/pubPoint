@@ -16,6 +16,7 @@ services:
         condition: service_healthy
     volumes:
         - ./app/backend:/app/
+        - ./docker_scripts:/scripts
 
 
   frontend:
