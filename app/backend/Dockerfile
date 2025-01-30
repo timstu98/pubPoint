@@ -15,4 +15,3 @@ EXPOSE 5001 5678
 
 # Start the Flask app
 CMD ["flask", "run", "--debug","--reload","--host=0.0.0.0", "--port=5001"]
-#CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client", "-m", "flask", "run", "--host=0.0.0.0", "--port=5001", "--no-reload"]
