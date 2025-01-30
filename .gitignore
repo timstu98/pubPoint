@@ -9,3 +9,5 @@
 app/backend/external_api_expected_response_formats.txt
 venv
 Planning Documents/
+.vscode/*
+!.vscode/launch.json
