@@ -15,7 +15,8 @@ class ApiClient:
             try:
                 print(f"Error: {response.json()['error']['message']}")
             except:
-                print(f"Error: status-code{response.status_code}, reason{response.reason}")
+                print(f"Error: status-code:{response.status_code}, reason:{response.reason}")
+                print(response.text)
             return None
         
     def get(self, endpoint, headers=None, data=None):
