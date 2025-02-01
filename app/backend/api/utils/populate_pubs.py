@@ -8,6 +8,7 @@ from models import Pub, db
 from dotenv import load_dotenv
 import os
 from sqlalchemy.exc import IntegrityError
+from api.clients.maps.mapClients import IMapApi
 
 if "/app" not in sys.path:
     print("Ensure you set the PYTHONPATH to ensure relative imports work correctly.")
@@ -61,42 +62,30 @@ def generate_rectangles(top_left, bottom_right, num_lat_divisions, num_lng_divis
     return rectangles
 
 
-def get_place_data_search_nearby(top_left, bottom_right, place_type="bar"):
-    url = "https://places.googleapis.com/v1/places:searchText"
-    headers = {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": API_KEY,
-        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,nextPageToken",
+def get_place_data_search_nearby(api:IMapApi, top_left, bottom_right, place_type="bar"):
+    location_restriction = {
+        "rectangle": {
+            "low": {"latitude": bottom_right[0], "longitude": top_left[1]},
+            "high": {"latitude": top_left[0], "longitude": bottom_right[1]},
+        }
     }
-    data = {
-        "textQuery": "pubs",
-        "maxResultCount": 20,
-        "locationRestriction": {
-            "rectangle": {
-                "low": {"latitude": bottom_right[0], "longitude": top_left[1]},
-                "high": {"latitude": top_left[0], "longitude": bottom_right[1]},
-            }
-        },
-    }
-
+    
     places_json = {"places": []}
+    pageToken = None
+
     while True:
-        response = requests.post(url, json=data, headers=headers)
-        if response.status_code == 200:
-            result = response.json()
+        result = api.search_places(place_type, location_restriction, pageToken)
+        if result:
             places_json["places"].extend(result["places"])
             if "nextPageToken" in result:
-                data["pageToken"] = result["nextPageToken"]
+                pageToken = result["nextPageToken"]
             else:
                 break
-        else:
-            print(f"Error: {response.json()['error']['message']}")
-            break
 
     return places_json
 
 
-def populate_pubs(top_left, bottom_right, num_lat_divisions, num_lng_divisions):
+def populate_pubs(api: IMapApi, top_left, bottom_right, num_lat_divisions, num_lng_divisions):
     # Generate rectangles.
     rectangles = generate_rectangles(top_left, bottom_right, num_lat_divisions, num_lng_divisions)
 
@@ -104,7 +93,7 @@ def populate_pubs(top_left, bottom_right, num_lat_divisions, num_lng_divisions):
     api_calls = 0
 
     for idx, (top_left, bottom_right) in enumerate(rectangles):
-        pub_data = get_place_data_search_nearby(top_left, bottom_right)
+        pub_data = get_place_data_search_nearby(api, top_left, bottom_right)
         if pub_data:
             for place in pub_data["places"]:
                 pub = (place["displayName"]["text"], place["formattedAddress"])
@@ -171,5 +160,7 @@ if __name__ == "__main__":
     # num_lng_divisions = 2
     
     from app import app
+    from api.clients.maps.mapClients import GoogleApi, IMapApi
+    api = GoogleApi(API_KEY)
     with app.app_context():
-        populate_pubs(top_left, bottom_right, num_lat_divisions, num_lng_divisions)
+        populate_pubs(api, top_left, bottom_right, num_lat_divisions, num_lng_divisions)
