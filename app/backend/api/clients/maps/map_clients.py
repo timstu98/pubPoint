@@ -1,4 +1,4 @@
-from api.clients.apiClient import ApiClient
+from api.clients.api_client import ApiClient
 from abc import ABC, abstractmethod
 
 # Abstract base class for any map API

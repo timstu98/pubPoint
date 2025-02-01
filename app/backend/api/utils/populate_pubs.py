@@ -8,7 +8,7 @@ from models import Pub, db
 from dotenv import load_dotenv
 import os
 from sqlalchemy.exc import IntegrityError
-from api.clients.maps.mapClients import IMapApi
+from api.clients.maps.map_clients import IMapApi
 
 if "/app" not in sys.path:
     print("Ensure you set the PYTHONPATH to ensure relative imports work correctly.")
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     # num_lng_divisions = 2
     
     from app import app
-    from api.clients.maps.mapClients import GoogleApi, IMapApi
+    from api.clients.maps.map_clients import GoogleApi, IMapApi
     api = GoogleApi(API_KEY)
     with app.app_context():
         populate_pubs(api, top_left, bottom_right, num_lat_divisions, num_lng_divisions)
