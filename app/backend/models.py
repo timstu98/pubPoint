@@ -1,6 +1,10 @@
+from datetime import datetime, timezone
 from uuid import uuid4
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import UniqueConstraint
 from sqlalchemy.inspection import inspect
+
+from api.clients.maps.routes_request import Coords
 
 
 def get_uuid():
@@ -65,3 +69,112 @@ class User(db.Model):
             "type": "user",
             "attributes": {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs if c.key != "id"},
         }
+
+class Location(db.Model):
+    __tablename__ = 'locations'
+    __table_args__ = (
+        UniqueConstraint('name', 'lat', 'lng', name='uq_location_name_coords'),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=True)
+    lat = db.Column(db.DECIMAL(11, 8), nullable=False)
+    lng = db.Column(db.DECIMAL(11, 8), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    
+    # Relationship to distances where this location is either origin or destination
+    distances_as_origin = db.relationship('Distance', 
+                                        foreign_keys='Distance.origin_id',
+                                        backref='origin',
+                                        cascade='all, delete-orphan')
+    
+    distances_as_destination = db.relationship('Distance',
+                                             foreign_keys='Distance.destination_id',
+                                             backref='destination',
+                                             cascade='all, delete-orphan')
+
+    @property
+    def coords(self):
+        return Coords(float(self.lat), float(self.lng))
+
+    def __repr__(self):
+        return f'<Location {self.name} ({self.lat}, {self.lng})>'
+    
+    @classmethod
+    def get_or_create(cls, name, lat, lng, commit=False):
+        """
+        Get or create a location with thread-safe creation
+        Args:
+            commit: Whether to immediately commit the transaction
+        """
+        # Try to find existing location first
+        existing = cls.query.filter(
+            db.func.lower(cls.name) == name.lower(),
+            db.func.round(cls.lat, 7) == db.func.round(lat, 7),
+            db.func.round(cls.lng, 7) == db.func.round(lng, 7)
+        ).first()
+
+        if existing:
+            return existing, False  # Return existing record, False for not created
+        
+        # Create new location if not found
+        new_location = cls(
+            name=name,
+            lat=lat,
+            lng=lng,
+        )
+        
+        db.session.add(new_location)
+        
+        if commit:
+            try:
+                db.session.commit()
+            except db.IntegrityError:
+                db.session.rollback()
+                raise
+        
+        return new_location, True  # Return new record, True for created
+    
+
+
+
+class Distance(db.Model):
+    __tablename__ = 'distances'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    origin_id = db.Column(db.Integer, db.ForeignKey('locations.id'), nullable=False)
+    destination_id = db.Column(db.Integer, db.ForeignKey('locations.id'), nullable=False)
+    meters = db.Column(db.Integer)  # Distance in meters
+    seconds = db.Column(db.Integer)  # Duration in seconds
+    calculated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    
+    # Composite unique constraint to prevent duplicate entries
+    __table_args__ = (
+        UniqueConstraint('origin_id', 'destination_id', name='uq_origin_destination'),
+        db.Index('idx_origin', 'origin_id'),
+        db.Index('idx_destination', 'destination_id'),
+    )
+
+    def __repr__(self):
+        return f'<Distance {self.origin_id}->{self.destination_id}: {self.seconds}s>'
+
+    @classmethod
+    def get_or_create(cls, origin:Location, destination:Location):
+        """Get existing distance or create a new entry if none exists"""
+        
+        distance = cls.query.filter_by(
+            origin_id=origin.id,
+            destination_id=destination.id
+        ).first()
+        
+        if not distance:
+            distance = cls(origin_id=origin.id, destination_id=destination.id)
+            db.session.add(distance)
+        
+        return distance
+
+    def update_distance(self, meters, seconds):
+        """Update distance metrics and timestamp"""
+        self.meters = meters
+        self.seconds = seconds
+        self.calculated_at = datetime.now(timezone.utc)
