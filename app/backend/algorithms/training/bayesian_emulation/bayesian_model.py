@@ -8,6 +8,7 @@ import os
 from sqlalchemy.exc import IntegrityError
 from api.clients.maps.map_clients import GoogleRoutesApi
 from api.clients.maps.routes_request import RoutesRequest
+import csv
 
 if "/app" not in sys.path:
     print("Ensure you set the PYTHONPATH to ensure relative imports work correctly.")
@@ -44,18 +45,26 @@ with app.app_context():
     # Create tables if they don't exist
     db.create_all()
     
-    # Create or get locations
-    farringdon_location, new = Location.get_or_create(
-        name="Farringdon Station",
-        lat=51.51996102,
-        lng=-0.103582415
-    )
-    
-    paddington_location, new = Location.get_or_create(
-        name="Paddington Station",
-        lat=51.51499491,
-        lng=-0.173789485
-    )
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_file_path = os.path.join(current_dir, 'data', 'starting_locations.csv')
+
+    locations = []
+    with open(csv_file_path, mode='r', newline='', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        
+        for row in reader:
+            name = row['Name']
+            lat = float(row['y'])  # Latitude is in the 'y' column
+            lng = float(row['x'])  # Longitude is in the 'x' column
+            
+            # Use get_or_create to create or retrieve the Location object
+            location, new = Location.get_or_create(
+                name=name,
+                lat=lat,
+                lng=lng
+            )
+
+            locations.append(location)
 
     # Commit once after all locations are processed
     try:
@@ -65,33 +74,38 @@ with app.app_context():
         print(f"Error committing locations: {e}")
         raise
     
-    try:
-        api = GoogleRoutesApi(API_KEY)
-        rqst = RoutesRequest([farringdon_location.coords], [paddington_location.coords])
+    for origin in locations:
+        for destination in locations:
+            try:
+                if origin == destination:
+                    continue
 
-        result = api.matrix(rqst)
-        if result:
-            # Get or create the distance relationship
-            distance_entry = Distance.get_or_create(farringdon_location, paddington_location)
-            
-            # Update with API results
-            distance_entry.update_distance(
-                meters=result[0]['distanceMeters'],
-                seconds=result[0]['staticDuration'].rstrip('s')
-            )
-            
-            # Commit the distance update
-            db.session.commit()
-            print(f"Successfully wrote distance: {distance_entry.meters}m")
-            
-            # Verify write
-            stored_distance = Distance.query.filter_by(
-                origin_id=farringdon_location.id,
-                destination_id=paddington_location.id
-            ).first()
-            
-            print(f"Database contains: {stored_distance.meters}m between locations")
-            
-    except Exception as e:
-        db.session.rollback()
-        print(f"Error processing distance: {e}")
+                api = GoogleRoutesApi(API_KEY)
+                rqst = RoutesRequest([origin.coords], [destination.coords])
+
+                result = api.matrix(rqst)
+                if result:
+                    # Get or create the distance relationship
+                    distance_entry = Distance.get_or_create(origin, destination)
+                    
+                    # Update with API results
+                    distance_entry.update_distance(
+                        meters=result[0]['distanceMeters'],
+                        seconds=result[0]['staticDuration'].rstrip('s')
+                    )
+                    
+                    # Commit the distance update
+                    db.session.commit()
+                    print(f"Successfully wrote distance: {distance_entry.meters}m")
+                    
+                    # Verify write
+                    stored_distance = Distance.query.filter_by(
+                        origin_id=origin.id,
+                        destination_id=destination.id
+                    ).first()
+                    
+                    print(f"Database contains: {stored_distance.meters}m between locations")
+                    
+            except Exception as e:
+                db.session.rollback()
+                print(f"Error processing distance: {e}")

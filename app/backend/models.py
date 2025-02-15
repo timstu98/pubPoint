@@ -107,33 +107,33 @@ class Location(db.Model):
         Args:
             commit: Whether to immediately commit the transaction
         """
-        # Try to find existing location first
-        existing = cls.query.filter(
-            db.func.lower(cls.name) == name.lower(),
-            db.func.round(cls.lat, 7) == db.func.round(lat, 7),
-            db.func.round(cls.lng, 7) == db.func.round(lng, 7)
-        ).first()
+        # Use no_autoflush to prevent premature INSERT
+        with db.session.no_autoflush:
+            existing = cls.query.filter(
+                db.func.lower(cls.name) == name.lower(),
+                cls.lat == db.cast(db.func.round(lat, 8), db.DECIMAL(11, 8)),
+                cls.lng == db.cast(db.func.round(lng, 8), db.DECIMAL(11, 8))
+            ).first()
 
-        if existing:
-            return existing, False  # Return existing record, False for not created
-        
-        # Create new location if not found
-        new_location = cls(
-            name=name,
-            lat=lat,
-            lng=lng,
-        )
-        
-        db.session.add(new_location)
-        
-        if commit:
-            try:
-                db.session.commit()
-            except db.IntegrityError:
-                db.session.rollback()
-                raise
-        
-        return new_location, True  # Return new record, True for created
+            if existing:
+                return existing, False  # Return old record, False for not created
+            
+            # Create new location
+            new_location = cls(
+                name=name,
+                lat=round(lat, 8),
+                lng=round(lng, 8),
+            )
+            db.session.add(new_location)
+
+            if commit:
+                try:
+                    db.session.commit()
+                except db.IntegrityError:
+                    db.session.rollback()
+                    raise
+            
+            return new_location, True # Return new record, True for created
     
 
 
