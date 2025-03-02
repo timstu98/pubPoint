@@ -2,6 +2,34 @@ import numpy as np
 
 class BayesianEmulator:
     def __init__(self, beta, sigma, theta, x_train, D=None, M=None):
+        '''
+        Creates a Bayesian Emulator for predicting the results of an expensive simulator (such as a Maps API)
+
+        Parameters:
+        beta : float
+            The mean of the Gaussian Process, representing the expected value of the simulation output, E[f(x)].
+            This is a constant value that shifts the entire Gaussian Process.
+
+        sigma : float
+            The standard deviation of the Gaussian Process, controlling the overall scale of the covariance.
+            This determines how much the function values can deviate from the mean.
+
+        theta : float
+            The correlation-length parameter of the Gaussian Process, controlling the smoothness of the function.
+            Smaller values of theta allow for more rapid changes in the function, while larger values result in smoother functions.
+
+        x_train: (array-like)
+            The active inputs chosen for each output of the true function to obtain the n known outputs, D
+            shape (n_samples, n_dimensions)
+
+        D: (array-like)
+            The known outputs obtained from running the true function for x_train
+            shape (n_samples,)
+
+        M: (array-like)
+            Precomputed value of Matrix M = Var[D]^{-1} (D - E[D])
+            shape (n_samples, n_samples)
+        '''
         self.beta = beta
         self.sigma = sigma
         self.theta = theta
@@ -41,7 +69,6 @@ class BayesianEmulator:
         
         Parameters:
         x (array-like): New input point to emulate, shape (n_dimensions,)
-        M (array-like, optional): Precomputed M matrix. If None, uses self.M
         """
         if self.M is None:
             raise ValueError("M has not been computed. Run compute_M first or provide M.")
