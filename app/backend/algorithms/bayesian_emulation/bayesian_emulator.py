@@ -1,7 +1,7 @@
 import numpy as np
 
 class BayesianEmulator:
-    def __init__(self, beta, sigma, theta, x_train, D=None, M=None):
+    def __init__(self, beta, sigma, theta, x_train, D, M=None):
         '''
         Creates a Bayesian Emulator for predicting the results of an expensive simulator (such as a Maps API)
 
@@ -37,16 +37,12 @@ class BayesianEmulator:
         self.D = D
         self.M = M
 
-    def compute_M(self, x_train, D):
+    def compute_M(self):
         """
         Computes the matrix M = Var[D]^{-1} (D - E[D])
-        
-        Parameters:
-        x_train (array-like): Training input points, shape (n_samples, n_dimensions)
-        D (array-like): Observed outputs at x_train, shape (n_samples,)
         """
-        self.x_train = np.array(x_train)
-        self.D = np.array(D)
+        self.x_train = np.array(self.x_train)
+        self.D = np.array(self.D)
         
         # Compute pairwise squared (Euclidean) distances, ||x^(j)-x^(k)||^2
         X = self.x_train
