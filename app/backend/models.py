@@ -111,8 +111,8 @@ class Location(db.Model):
         with db.session.no_autoflush:
             existing = cls.query.filter(
                 db.func.lower(cls.name) == name.lower(),
-                cls.lat == db.cast(db.func.round(lat, 8), db.DECIMAL(11, 8)),
-                cls.lng == db.cast(db.func.round(lng, 8), db.DECIMAL(11, 8))
+                cls.lat == round(lat, 8),
+                cls.lng == round(lng, 8)
             ).first()
 
             if existing:
@@ -162,17 +162,19 @@ class Distance(db.Model):
     def get_or_create(cls, origin:Location, destination:Location):
         """Get existing distance or create a new entry if none exists"""
         
-        distance = cls.query.filter_by(
+        existing = cls.query.filter_by(
             origin_id=origin.id,
             destination_id=destination.id
         ).first()
-        
-        if not distance:
-            distance = cls(origin_id=origin.id, destination_id=destination.id)
-            db.session.add(distance)
-        
-        return distance
 
+        if existing:
+            return existing, False
+        
+        new_distance = cls(origin_id=origin.id, destination_id=destination.id)
+        db.session.add(new_distance)
+
+        return new_distance, True
+        
     def update_distance(self, meters, seconds):
         """Update distance metrics and timestamp"""
         self.meters = meters

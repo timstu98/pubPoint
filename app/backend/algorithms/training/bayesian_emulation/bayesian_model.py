@@ -80,13 +80,19 @@ with app.app_context():
                 if origin == destination:
                     continue
 
+                # Get or create the distance relationship
+                distance_entry, isNew = Distance.get_or_create(origin, destination)
+
+                if not isNew:
+                    distance_in_db = distance_entry.seconds
+                    if distance_in_db > 0:
+                        continue
+                
                 api = GoogleRoutesApi(API_KEY)
                 rqst = RoutesRequest([origin.coords], [destination.coords])
 
                 result = api.matrix(rqst)
                 if result:
-                    # Get or create the distance relationship
-                    distance_entry = Distance.get_or_create(origin, destination)
                     
                     # Update with API results
                     distance_entry.update_distance(
@@ -96,7 +102,7 @@ with app.app_context():
                     
                     # Commit the distance update
                     db.session.commit()
-                    print(f"Successfully wrote distance: {distance_entry.meters}m")
+                    print(f"Successfully wrote distance: {distance_entry.origin_id} -> {distance_entry.destination_id} = {distance_entry.seconds}s")
                     
                     # Verify write
                     stored_distance = Distance.query.filter_by(
