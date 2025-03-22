@@ -7,6 +7,7 @@ from models import db, Location, Distance
 from dotenv import load_dotenv
 import os
 import csv
+from geographiclib.geodesic import LocalCartesian
 
 if "/app" not in sys.path:
     print("Ensure you set the PYTHONPATH to ensure relative imports work correctly.")
@@ -52,8 +53,10 @@ def get_distance(origin, destination):
             
         return distance_entry.seconds
 
-def to_xj(origin, destination):
-    return [float(origin.lat), float(origin.lng), float(destination.lat), float(destination.lng)]
+def to_x_input(origin, destination, meters_converter):
+    x_origin, y_origin, _ = meters_converter.Forward(origin.lat, origin.lon, 0)
+    x_dest, y_dest, _ = meters_converter.Forward(destination.lat, destination.lon, 0)
+    return [x_origin, y_origin, x_dest, y_dest]
 
 with app.app_context():    
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -75,20 +78,22 @@ with app.app_context():
 
             locations.append(location)
 
+    # To make coordinates uniform, we measure every point in Cartesian distance from Westminster Abbey
+    meters_converter = LocalCartesian(51.4994, 0.1273, 0)
+
     x_train = [] # Training Points, X_A
     D = [] # Known outputs, f(X_A)
     for origin in locations:
         for destination in locations:
-            x_j = to_xj(origin, destination)
+            x_j = to_x_input(origin, destination, meters_converter)
             d_j = float(get_distance(origin, destination))
             x_train.append(x_j)
             D.append(d_j)
 
     Beta = 45 * 60 * 60 # Beta = E[f(x)] : "everywhere in London is 45 minutes away" - someone, probably
-    sigma = 5 * 60 * 60 # sigma = standard deviation : 5 min estimate for now
+    sigma = 10 * 60 * 60 # sigma = standard deviation : 10 min estimate for now
 
-    # TODO - calculating theta shows that lat/long is not a uniform space! Need to convert it to have any chance of this working well
-    theta = 0.1 # theta = correlation-scale of the gaussian process : Solution space ~=0.300, taking a third as a standard starting point
+    theta = 20000 # theta = correlation-scale of the gaussian process : Solution space ~=60km wide, taking a third as a standard starting point
 
     bayesianEmulator = BayesianEmulator(Beta, sigma, theta, x_train, D)
 
@@ -96,11 +101,9 @@ with app.app_context():
 
     banana = 0
 
-    # TODO - I think this is failing to match due to numerical instability. Need to fix the units, see if I can converter long lat to actual meters.
-    # Maybe something fun like meters north / south of Big Ben
     for origin in locations:
         for destination in locations:
-            emulated = bayesianEmulator.emulate(to_xj(origin, destination))
+            emulated = bayesianEmulator.emulate(to_x_input(origin, destination, meters_converter))
             d_j = float(get_distance(origin, destination))
 
             diff = emulated - d_j
