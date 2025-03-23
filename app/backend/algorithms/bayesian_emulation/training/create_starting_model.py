@@ -9,6 +9,7 @@ import os
 import csv
 import numpy as np
 from algorithms.bayesian_emulation.coord_transformer import CoordTransformer
+from model_extensions import VectorExtensions
 
 if "/app" not in sys.path:
     print("Ensure you set the PYTHONPATH to ensure relative imports work correctly.")
@@ -31,14 +32,6 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Initialize database
 db.init_app(app)
-
-def get_engine():
-    return create_engine(DATABASE_URI)
-
-
-def get_session(engine):
-    Session = sessionmaker(bind=engine)
-    return Session()
 
 def get_distance(origin, destination):
     if origin == destination:
@@ -89,11 +82,6 @@ with app.app_context():
             x_train.append(x_j)
             D.append(d_j)
 
-    # Beta = 45 * 60 * 60 # Beta = E[f(x)] : "everywhere in London is 45 minutes away" - someone, probably
-    # sigma = 10 * 60 * 60 # sigma = standard deviation : 10 min estimate for now
-
-    # theta = 7000 # theta = correlation-scale of the gaussian process : Solution space ~=20km wide, taking a third as a standard starting point
-
     Beta = np.average(D) # Beta = E[f(x)] : assume mean of training data is mean of solution space
     sigma = np.sqrt(np.var(D)) # sigma = standard deviation : assume sd of training data is sd of solution space
     theta = (np.max(x_train, axis=0)[0] - np.min(x_train, axis=0)[0])/3 # theta = correlation-scale of the gaussian process : Assume a third the width of the solution space as estimate
@@ -102,8 +90,6 @@ with app.app_context():
 
     M = bayesianEmulator.compute_M()
 
-    banana = 0
-
     for origin in locations:
         for destination in locations:
             emulated = bayesianEmulator.emulate(to_x_input(origin, destination, transformer))
@@ -111,5 +97,7 @@ with app.app_context():
 
             diff = emulated - d_j
 
-            banana = 0
+            if diff > 10:
+                raise f"Error in training Bayesian Emulator - predictions of distance for training data over 10 seconds different from provided values. {origin.name}-{destination.name} returned difference of {diff}"
                 
+    VectorExtensions.insert_vector("initial-set", M)

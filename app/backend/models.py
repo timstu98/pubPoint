@@ -3,6 +3,7 @@ from uuid import uuid4
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.inspection import inspect
+from sqlalchemy import DECIMAL
 
 from api.clients.maps.routes_request import Coords
 
@@ -180,3 +181,23 @@ class Distance(db.Model):
         self.meters = meters
         self.seconds = seconds
         self.calculated_at = datetime.now(timezone.utc)
+
+class Vector(db.Model):
+    __tablename__ = "vectors"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), unique=True, nullable=False)
+    length = db.Column(db.Integer, nullable=False)
+    
+class VectorElement(db.Model):
+    __tablename__ = "vector_elements"
+    id = db.Column(db.Integer, primary_key=True)
+    vector_id = db.Column(db.Integer, db.ForeignKey("vectors.id"), nullable=False)
+    index = db.Column(db.Integer, nullable=False)  # Row index (0-based)
+    value = db.Column(DECIMAL(precision=30, scale=15), nullable=False)  # Value of the cell
+
+    vector = db.relationship("Vector", backref=db.backref("elements", lazy=True))
+
+    # Ensure that each element in a vector is unique
+    __table_args__ = (
+        UniqueConstraint('vector_id', 'index', name='uq_vector_element'),
+    )
