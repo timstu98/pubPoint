@@ -182,22 +182,54 @@ class Distance(db.Model):
         self.seconds = seconds
         self.calculated_at = datetime.now(timezone.utc)
 
-class Vector(db.Model):
-    __tablename__ = "vectors"
+class BayesianEmulation(db.Model):
+    __tablename__ = "bayesian_emulation"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), unique=True, nullable=False)
-    length = db.Column(db.Integer, nullable=False)
+    m_length = db.Column(db.Integer, nullable=False)
+    d_length = db.Column(db.Integer, nullable=False)
+    beta = db.Column(DECIMAL(precision=30, scale=15), nullable=False)
+    sigma = db.Column(DECIMAL(precision=30, scale=15), nullable=False)
+    theta = db.Column(DECIMAL(precision=30, scale=15), nullable=False)
     
-class VectorElement(db.Model):
-    __tablename__ = "vector_elements"
+class MVectorElement(db.Model):
+    __tablename__ = "m_vector_elements"
     id = db.Column(db.Integer, primary_key=True)
-    vector_id = db.Column(db.Integer, db.ForeignKey("vectors.id"), nullable=False)
+    bayesian_emulation_id = db.Column(db.Integer, db.ForeignKey("bayesian_emulation.id"), nullable=False)
     index = db.Column(db.Integer, nullable=False)  # Row index (0-based)
     value = db.Column(DECIMAL(precision=30, scale=15), nullable=False)  # Value of the cell
 
-    vector = db.relationship("Vector", backref=db.backref("elements", lazy=True))
+    m_vector = db.relationship("BayesianEmulation", backref=db.backref("m_vector_elements", lazy=True))
 
-    # Ensure that each element in a vector is unique
+    # Ensure that each element in a mVector is unique
     __table_args__ = (
-        UniqueConstraint('vector_id', 'index', name='uq_vector_element'),
+        UniqueConstraint('bayesian_emulation_id', 'index', name='uq_m_vector_element'),
+    ) 
+
+class XTrainElements(db.Model):
+    __tablename__ = "x_train_elements"
+    id = db.Column(db.Integer, primary_key=True)
+    bayesian_emulation_id = db.Column(db.Integer, db.ForeignKey("bayesian_emulation.id"), nullable=False)
+    index = db.Column(db.Integer, nullable=False)  # Row index (0-based)
+    value = db.Column(DECIMAL(precision=30, scale=15), nullable=False)  # Value of the cell
+
+    m_vector = db.relationship("BayesianEmulation", backref=db.backref("x_train_elements", lazy=True))
+
+    # Ensure that each element in a xTrain is unique
+    __table_args__ = (
+        UniqueConstraint('bayesian_emulation_id', 'index', name='uq_x_train_element'),
+    )
+
+class DElements(db.Model):
+    __tablename__ = "d_elements"
+    id = db.Column(db.Integer, primary_key=True)
+    bayesian_emulation_id = db.Column(db.Integer, db.ForeignKey("bayesian_emulation.id"), nullable=False)
+    index = db.Column(db.Integer, nullable=False)  # Row index (0-based)
+    value = db.Column(DECIMAL(precision=30, scale=15), nullable=False)  # Value of the cell
+
+    m_vector = db.relationship("BayesianEmulation", backref=db.backref("d_elements", lazy=True))
+
+    # Ensure that each element in a D is unique
+    __table_args__ = (
+        UniqueConstraint('bayesian_emulation_id', 'index', name='uq_x_train_element'),
     )

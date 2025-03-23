@@ -9,7 +9,7 @@ import os
 import csv
 import numpy as np
 from algorithms.bayesian_emulation.coord_transformer import CoordTransformer
-from model_extensions import VectorExtensions
+from model_extensions import MVectorExtensions
 
 if "/app" not in sys.path:
     print("Ensure you set the PYTHONPATH to ensure relative imports work correctly.")
@@ -100,4 +100,4 @@ with app.app_context():
             if diff > 10:
                 raise f"Error in training Bayesian Emulator - predictions of distance for training data over 10 seconds different from provided values. {origin.name}-{destination.name} returned difference of {diff}"
                 
-    VectorExtensions.insert_vector("initial-set", M)
+    MVectorExtensions.insert_m_vector("initial-set", Beta, sigma, theta, M)
