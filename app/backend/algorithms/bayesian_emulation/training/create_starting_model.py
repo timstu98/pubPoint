@@ -7,7 +7,8 @@ from models import db, Location, Distance
 from dotenv import load_dotenv
 import os
 import csv
-from geographiclib.geodesic import LocalCartesian
+import numpy as np
+from algorithms.bayesian_emulation.coord_transformer import CoordTransformer
 
 if "/app" not in sys.path:
     print("Ensure you set the PYTHONPATH to ensure relative imports work correctly.")
@@ -53,9 +54,9 @@ def get_distance(origin, destination):
             
         return distance_entry.seconds
 
-def to_x_input(origin, destination, meters_converter):
-    x_origin, y_origin, _ = meters_converter.Forward(origin.lat, origin.lon, 0)
-    x_dest, y_dest, _ = meters_converter.Forward(destination.lat, destination.lon, 0)
+def to_x_input(origin, destination, transformer):
+    x_origin, y_origin = transformer.transform(origin.lat, origin.lng)
+    x_dest, y_dest = transformer.transform(destination.lat, destination.lng)
     return [x_origin, y_origin, x_dest, y_dest]
 
 with app.app_context():    
@@ -78,22 +79,24 @@ with app.app_context():
 
             locations.append(location)
 
-    # To make coordinates uniform, we measure every point in Cartesian distance from Westminster Abbey
-    meters_converter = LocalCartesian(51.4994, 0.1273, 0)
-
+    transformer = CoordTransformer()
     x_train = [] # Training Points, X_A
     D = [] # Known outputs, f(X_A)
     for origin in locations:
         for destination in locations:
-            x_j = to_x_input(origin, destination, meters_converter)
+            x_j = to_x_input(origin, destination, transformer)
             d_j = float(get_distance(origin, destination))
             x_train.append(x_j)
             D.append(d_j)
 
-    Beta = 45 * 60 * 60 # Beta = E[f(x)] : "everywhere in London is 45 minutes away" - someone, probably
-    sigma = 10 * 60 * 60 # sigma = standard deviation : 10 min estimate for now
+    # Beta = 45 * 60 * 60 # Beta = E[f(x)] : "everywhere in London is 45 minutes away" - someone, probably
+    # sigma = 10 * 60 * 60 # sigma = standard deviation : 10 min estimate for now
 
-    theta = 20000 # theta = correlation-scale of the gaussian process : Solution space ~=60km wide, taking a third as a standard starting point
+    # theta = 7000 # theta = correlation-scale of the gaussian process : Solution space ~=20km wide, taking a third as a standard starting point
+
+    Beta = np.average(D) # Beta = E[f(x)] : assume mean of training data is mean of solution space
+    sigma = np.sqrt(np.var(D)) # sigma = standard deviation : assume sd of training data is sd of solution space
+    theta = (np.max(x_train, axis=0)[0] - np.min(x_train, axis=0)[0])/3 # theta = correlation-scale of the gaussian process : Assume a third the width of the solution space as estimate
 
     bayesianEmulator = BayesianEmulator(Beta, sigma, theta, x_train, D)
 
@@ -103,7 +106,7 @@ with app.app_context():
 
     for origin in locations:
         for destination in locations:
-            emulated = bayesianEmulator.emulate(to_x_input(origin, destination, meters_converter))
+            emulated = bayesianEmulator.emulate(to_x_input(origin, destination, transformer))
             d_j = float(get_distance(origin, destination))
 
             diff = emulated - d_j

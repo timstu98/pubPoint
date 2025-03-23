@@ -21,4 +21,4 @@ python-dotenv==1.0.0
 debugpy==1.8.12
 gunicorn==21.2.0
 numpy==2.2.3
-geographiclib==1.52.0
+pyproj==3.7.1
