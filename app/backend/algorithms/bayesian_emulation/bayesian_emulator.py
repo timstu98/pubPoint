@@ -30,12 +30,12 @@ class BayesianEmulator:
             Precomputed value of Matrix M = Var[D]^{-1} (D - E[D])
             shape (n_samples, n_samples)
         '''
-        self.beta = beta
-        self.sigma = sigma
-        self.theta = theta
-        self.x_train = x_train
-        self.D = D
-        self.M = M
+        self.beta = np.array(beta, dtype=np.float64)
+        self.sigma = np.array(sigma, dtype=np.float64)
+        self.theta = np.array(theta, dtype=np.float64)
+        self.x_train = np.array(x_train, dtype=np.float64)
+        self.D = np.array(D, dtype=np.float64)
+        self.M = np.array(M, dtype=np.float64)
 
     def compute_M(self):
         """
@@ -69,7 +69,7 @@ class BayesianEmulator:
         if self.M is None:
             raise ValueError("M has not been computed. Run compute_M first or provide M.")
     
-        x = np.array(x)
+        x = np.array(x, dtype=np.float64)
         
         # Compute squared distances between x and each training point, ||x-x^(j)||^2
         sq_dists = np.sum((x-self.x_train)**2, axis=1)

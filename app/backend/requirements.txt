@@ -22,3 +22,5 @@ debugpy==1.8.12
 gunicorn==21.2.0
 numpy==2.2.3
 pyproj==3.7.1
+mpmath==1.3.0
+matplotlib==3.10.1

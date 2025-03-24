@@ -1,17 +1,16 @@
 from decimal import Decimal
-from models import BayesianEmulation, DElements, XTrainElements, db, MVector, MVectorElement
-import numpy as np
+from models import BayesianModel, DElement, XTrainElement, MVectorElement, db
 
 from decimal import Decimal
 
-class BayesianEmulationExtensions:
+class BayesianModelExtensions:
     @staticmethod
-    def insert_bayesian_emulation(name, m_vector, x_train, d_vector, beta, sigma, theta, commit=True):
+    def insert_bayesian_model(name, m_vector, x_train, d_vector, beta, sigma, theta, commit=True):
         """
-        Insert a BayesianEmulation into the database.
+        Insert a BayesianModel into the database.
         
         Args:
-            name (str): Name of the BayesianEmulation.
+            name (str): Name of the BayesianModel.
             m_vector (list of Decimal or float): The M vector.
             x_train (list of Decimal or float): The X_train vector.
             d_vector (list of Decimal or float): The D vector.
@@ -21,18 +20,18 @@ class BayesianEmulationExtensions:
             commit (bool): Whether to commit the transaction immediately.
         
         Returns:
-            BayesianEmulation: The created BayesianEmulation object.
+            BayesianModel: The created BayesianModel object.
         """
         # Convert inputs to Decimal for precision
         m_vector = [Decimal(str(v)) for v in m_vector]
-        x_train = [Decimal(str(v)) for v in x_train]
+        x_train = [[Decimal(str(v)) for v in row] for row in x_train]
         d_vector = [Decimal(str(v)) for v in d_vector]
         beta = Decimal(str(beta))
         sigma = Decimal(str(sigma))
         theta = Decimal(str(theta))
 
-        # Create the BayesianEmulation entry
-        new_emulation = BayesianEmulation(
+        # Create the BayesianModel entry
+        new_emulation = BayesianModel(
             name=name,
             m_length=len(m_vector),
             d_length=len(d_vector),
@@ -47,17 +46,17 @@ class BayesianEmulationExtensions:
 
         # Insert M vector elements
         for i, value in enumerate(m_vector):
-            element = MVectorElement(bayesian_emulation_id=new_emulation.id, index=i, value=value)
+            element = MVectorElement(bayesian_model_id=new_emulation.id, index=i, value=value)
             db.session.add(element)
 
         # Insert X_train elements
-        for i, value in enumerate(x_train):
-            element = XTrainElements(bayesian_emulation_id=new_emulation.id, index=i, value=value)
-            db.session.add(element)
+        for i, row in enumerate(x_train):
+            for j, val in enumerate(row):
+                db.session.add(XTrainElement(bayesian_model_id=new_emulation.id,row=i,col=j,value=val))
 
         # Insert D vector elements
         for i, value in enumerate(d_vector):
-            element = DElements(bayesian_emulation_id=new_emulation.id, index=i, value=value)
+            element = DElement(bayesian_model_id=new_emulation.id, index=i, value=value)
             db.session.add(element)
 
         if commit:
@@ -66,30 +65,30 @@ class BayesianEmulationExtensions:
         return new_emulation
 
     @staticmethod
-    def get_bayesian_emulation_by_name(name, commit=True):
+    def get_bayesian_model_by_name(name):
         """
-        Retrieve a BayesianEmulation by its name.
+        Retrieve a BayesianModel by its name.
         
         Args:
-            name (str): Name of the BayesianEmulation.
+            name (str): Name of the BayesianModel.
             commit (bool): Whether to commit the transaction immediately.
         
         Returns:
-            dict: A dictionary containing the BayesianEmulation data, or None if not found.
+            dict: A dictionary containing the BayesianModel data, or None if not found.
         """
-        emulation = BayesianEmulation.query.filter_by(name=name).first()
+        emulation = BayesianModel.query.filter_by(name=name).first()
         if not emulation:
             return None
 
         return emulation
 
     @staticmethod
-    def update_bayesian_emulation(name, m_vector=None, x_train=None, d_vector=None, beta=None, sigma=None, theta=None, commit=True):
+    def update_bayesian_model(name, m_vector=None, x_train=None, d_vector=None, beta=None, sigma=None, theta=None, commit=True):
         """
-        Update a BayesianEmulation in the database.
+        Update a BayesianModel in the database.
         
         Args:
-            name (str): Name of the BayesianEmulation.
+            name (str): Name of the BayesianModel.
             m_vector (list of Decimal or float): The new M vector (optional).
             x_train (list of Decimal or float): The new X_train vector (optional).
             d_vector (list of Decimal or float): The new D vector (optional).
@@ -99,9 +98,9 @@ class BayesianEmulationExtensions:
             commit (bool): Whether to commit the transaction immediately.
         
         Returns:
-            bool: True if the BayesianEmulation was updated, False if not found.
+            bool: True if the BayesianModel was updated, False if not found.
         """
-        emulation = BayesianEmulation.query.filter_by(name=name).first()
+        emulation = BayesianModel.query.filter_by(name=name).first()
         if not emulation:
             return False
 
@@ -115,28 +114,28 @@ class BayesianEmulationExtensions:
 
         # Update M vector if provided
         if m_vector is not None:
-            MVectorElement.query.filter_by(bayesian_emulation_id=emulation.id).delete()
+            MVectorElement.query.filter_by(bayesian_model_id=emulation.id).delete()
             m_vector = [Decimal(str(v)) for v in m_vector]
             emulation.m_length = len(m_vector)
             for i, value in enumerate(m_vector):
-                element = MVectorElement(bayesian_emulation_id=emulation.id, index=i, value=value)
+                element = MVectorElement(bayesian_model_id=emulation.id, index=i, value=value)
                 db.session.add(element)
 
         # Update X_train if provided
         if x_train is not None:
-            XTrainElements.query.filter_by(bayesian_emulation_id=emulation.id).delete()
+            XTrainElement.query.filter_by(bayesian_model_id=emulation.id).delete()
             x_train = [Decimal(str(v)) for v in x_train]
             for i, value in enumerate(x_train):
-                element = XTrainElements(bayesian_emulation_id=emulation.id, index=i, value=value)
+                element = XTrainElement(bayesian_model_id=emulation.id, index=i, value=value)
                 db.session.add(element)
 
         # Update D vector if provided
         if d_vector is not None:
-            DElements.query.filter_by(bayesian_emulation_id=emulation.id).delete()
+            DElement.query.filter_by(bayesian_model_id=emulation.id).delete()
             d_vector = [Decimal(str(v)) for v in d_vector]
             emulation.d_length = len(d_vector)
             for i, value in enumerate(d_vector):
-                element = DElements(bayesian_emulation_id=emulation.id, index=i, value=value)
+                element = DElement(bayesian_model_id=emulation.id, index=i, value=value)
                 db.session.add(element)
 
         if commit:
@@ -145,27 +144,27 @@ class BayesianEmulationExtensions:
         return True
 
     @staticmethod
-    def delete_bayesian_emulation(name, commit=True):
+    def delete_bayesian_model(name, commit=True):
         """
-        Delete a BayesianEmulation from the database.
+        Delete a BayesianModel from the database.
         
         Args:
-            name (str): Name of the BayesianEmulation.
+            name (str): Name of the BayesianModel.
             commit (bool): Whether to commit the transaction immediately.
         
         Returns:
-            bool: True if the BayesianEmulation was deleted, False if not found.
+            bool: True if the BayesianModel was deleted, False if not found.
         """
-        emulation = BayesianEmulation.query.filter_by(name=name).first()
+        emulation = BayesianModel.query.filter_by(name=name).first()
         if not emulation:
             return False
 
         # Delete all associated elements
-        MVectorElement.query.filter_by(bayesian_emulation_id=emulation.id).delete()
-        XTrainElements.query.filter_by(bayesian_emulation_id=emulation.id).delete()
-        DElements.query.filter_by(bayesian_emulation_id=emulation.id).delete()
+        MVectorElement.query.filter_by(bayesian_model_id=emulation.id).delete()
+        XTrainElement.query.filter_by(bayesian_model_id=emulation.id).delete()
+        DElement.query.filter_by(bayesian_model_id=emulation.id).delete()
 
-        # Delete the BayesianEmulation entry
+        # Delete the BayesianModel entry
         db.session.delete(emulation)
 
         if commit:

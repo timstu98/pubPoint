@@ -1,6 +1,5 @@
+from decimal import Decimal
 import sys
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from flask import Flask 
 from algorithms.bayesian_emulation.bayesian_emulator import BayesianEmulator
 from models import db, Location, Distance
@@ -9,7 +8,7 @@ import os
 import csv
 import numpy as np
 from algorithms.bayesian_emulation.coord_transformer import CoordTransformer
-from model_extensions import MVectorExtensions
+from model_extensions import BayesianModelExtensions
 
 if "/app" not in sys.path:
     print("Ensure you set the PYTHONPATH to ensure relative imports work correctly.")
@@ -50,7 +49,12 @@ def get_distance(origin, destination):
 def to_x_input(origin, destination, transformer):
     x_origin, y_origin = transformer.transform(origin.lat, origin.lng)
     x_dest, y_dest = transformer.transform(destination.lat, destination.lng)
-    return [x_origin, y_origin, x_dest, y_dest]
+    return [
+        Decimal(str(x_origin)),  # Convert via string to avoid floating-point inaccuracies
+        Decimal(str(y_origin)),
+        Decimal(str(x_dest)),
+        Decimal(str(y_dest))
+    ]
 
 with app.app_context():    
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -78,12 +82,12 @@ with app.app_context():
     for origin in locations:
         for destination in locations:
             x_j = to_x_input(origin, destination, transformer)
-            d_j = float(get_distance(origin, destination))
+            d_j = get_distance(origin, destination)
             x_train.append(x_j)
             D.append(d_j)
 
-    Beta = np.average(D) # Beta = E[f(x)] : assume mean of training data is mean of solution space
-    sigma = np.sqrt(np.var(D)) # sigma = standard deviation : assume sd of training data is sd of solution space
+    Beta = Decimal(str(np.average(D))) # Beta = E[f(x)] : assume mean of training data is mean of solution space
+    sigma = Decimal(str(np.sqrt(np.var(D))))*2 # sigma = standard deviation : assume twice sd of training data is sd of solution space
     theta = (np.max(x_train, axis=0)[0] - np.min(x_train, axis=0)[0])/3 # theta = correlation-scale of the gaussian process : Assume a third the width of the solution space as estimate
 
     bayesianEmulator = BayesianEmulator(Beta, sigma, theta, x_train, D)
@@ -100,4 +104,4 @@ with app.app_context():
             if diff > 10:
                 raise f"Error in training Bayesian Emulator - predictions of distance for training data over 10 seconds different from provided values. {origin.name}-{destination.name} returned difference of {diff}"
                 
-    MVectorExtensions.insert_m_vector("initial-set", Beta, sigma, theta, M)
+    BayesianModelExtensions.insert_bayesian_model("initial-set-4", M, x_train, D, Beta, sigma, theta)
