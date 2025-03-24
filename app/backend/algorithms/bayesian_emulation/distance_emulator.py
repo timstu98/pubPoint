@@ -51,7 +51,7 @@ with app.app_context():
 
     transformer = CoordTransformer()
 
-    model:BayesianModel = BayesianModelExtensions.get_bayesian_model_by_name("initial-set-4")
+    model:BayesianModel = BayesianModelExtensions.get_bayesian_model_by_name("initial-set-5")
     
     x_train = []
     row = []
@@ -69,10 +69,10 @@ with app.app_context():
 
     emulator = BayesianEmulator(model.beta, model.sigma, model.theta, x_train, D, M)
 
-    # origin = Coords(51.48827, -0.11138) # Kennington
-    # destination = Coords(51.52118, -0.13946) # BT Tower
+    origin = Coords(51.48827, -0.11138) # Kennington
+    destination = Coords(51.52118, -0.13946) # BT Tower
 
-    # distance = emulator.emulate(to_x_input(origin, destination, transformer))  
+    distance = emulator.emulate(to_x_input(origin, destination, transformer))  
 
     # x,y = transformer.transform(51.564, -0.320)
     # xb,yb = transformer.transform(51.433, 0.012)
@@ -105,11 +105,7 @@ with app.app_context():
     # Plot
     plt.figure(figsize=(12, 8))
     contour = plt.contourf(X, Y, distances, levels=50, cmap=cmap, norm=norm)
-    cbar = plt.colorbar(contour, label='Distance from Start (Negative vs Positive)')
-
-    # Highlight zero distance (if it exists in your data)
-    if np.any(distances == 0):
-        plt.contour(X, Y, distances, levels=[0], colors='black', linewidths=2)
+    cbar = plt.colorbar(contour, label='Distance from Start')
 
     # Mark start point
     plt.scatter(start_x, start_y, c='lime', s=200, marker='*', edgecolor='black', label=f'Start ({start_x}, {start_y})')

@@ -86,9 +86,9 @@ with app.app_context():
             x_train.append(x_j)
             D.append(d_j)
 
-    Beta = Decimal(str(np.average(D))) # Beta = E[f(x)] : assume mean of training data is mean of solution space
-    sigma = Decimal(str(np.sqrt(np.var(D))))*2 # sigma = standard deviation : assume twice sd of training data is sd of solution space
-    theta = (np.max(x_train, axis=0)[0] - np.min(x_train, axis=0)[0])/3 # theta = correlation-scale of the gaussian process : Assume a third the width of the solution space as estimate
+    Beta = 45 # Beta = E[f(x)] : "everywhere in London is 45 minutes away" - someone, probably
+    sigma = 1 # sigma = standard deviation : estimate
+    theta = 5000 # theta = correlation-scale of the gaussian process : estimate
 
     bayesianEmulator = BayesianEmulator(Beta, sigma, theta, x_train, D)
 
@@ -104,4 +104,4 @@ with app.app_context():
             if diff > 10:
                 raise f"Error in training Bayesian Emulator - predictions of distance for training data over 10 seconds different from provided values. {origin.name}-{destination.name} returned difference of {diff}"
                 
-    BayesianModelExtensions.insert_bayesian_model("initial-set-4", M, x_train, D, Beta, sigma, theta)
+    BayesianModelExtensions.insert_bayesian_model("initial-set-5", M, x_train, D, Beta, sigma, theta)
