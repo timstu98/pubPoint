@@ -5,10 +5,13 @@ services:
     build: ./app/backend
     ports:
       - "5001:5001"
+      - "5678:5678" #debubpy port
+
     environment:
       - FLASK_ENV=development
       - DATABASE_URL=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
       - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
     env_file:
       - .env
     depends_on:
@@ -16,6 +19,7 @@ services:
         condition: service_healthy
     volumes:
         - ./app/backend:/app/
+        - ./docker_scripts:/scripts
 
 
   frontend:

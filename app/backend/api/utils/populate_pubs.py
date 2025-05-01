@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 import os
 from sqlalchemy.exc import IntegrityError
 
-
 if "/app" not in sys.path:
     print("Ensure you set the PYTHONPATH to ensure relative imports work correctly.")
 
