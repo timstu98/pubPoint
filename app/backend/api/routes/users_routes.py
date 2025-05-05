@@ -3,8 +3,11 @@ from models import db, User, Group, UserGroupQuery
 from http import HTTPStatus
 from .common import create_success_response, paginate_query, create_error_response, create_error
 from uuid import uuid4
+import os
 
 # Relative import not necessary apparently.
+API_VERSION = os.getenv("API_VERSION", "vX")
+api_url_prefix = f"/api/{API_VERSION}"
 
 users_routes = Blueprint("users_routes", __name__)
 
@@ -12,7 +15,7 @@ users_routes = Blueprint("users_routes", __name__)
 @users_routes.route("/users", methods=["GET"])
 def get_users():
     users = User.query.all()
-    paginated_users, meta, links = paginate_query(users, request.args, "/v1/api/users")
+    paginated_users, meta, links = paginate_query(users, request.args, "{api_url_prefix}/users")
     return (
         jsonify(
             create_success_response(
@@ -29,7 +32,7 @@ def get_users():
 @users_routes.route("/users/<string:user_id>", methods=["GET"])
 def get_user(user_id):
     user = User.query.get_or_404(user_id).get_as_dict()
-    data = {**user, "links": {"self": f"/v1/api/users/{user_id}"}}
+    data = {**user, "links": {"self": f"{api_url_prefix}/users/{user_id}"}}
     return (
         jsonify(
             create_success_response(
@@ -80,7 +83,7 @@ def create_user():
             "id": new_user.id,
             "type": "user",
             "attributes": {"address": new_user.address, "first_name": new_user.first_name, "second_name": new_user.second_name},
-            "links": {"self": f"v1/api/users/{new_user.id}"},
+            "links": {"self": f"{api_url_prefix}/users/{new_user.id}"},
         }
         return (
             jsonify(
@@ -132,7 +135,7 @@ def patch_user(user_id):
 
     try:
         db.session.commit()
-        data = {**user_query.get_as_dict(), "links": {"self": f"/v1/api/users/{user_query.id}"}}
+        data = {**user_query.get_as_dict(), "links": {"self": f"{api_url_prefix}/users/{user_query.id}"}}
 
         return (
             jsonify(
@@ -178,7 +181,7 @@ def put_user(user_id):
 
     try:
         db.session.commit()
-        data = {**user_query.get_as_dict(), "links": {"self": f"/v1/api/users/{user_query.id}"}}
+        data = {**user_query.get_as_dict(), "links": {"self": f"{api_url_prefix}/users/{user_query.id}"}}
         return (
             jsonify(
                 create_success_response(
@@ -202,7 +205,7 @@ def get_user_groups(user_id):
     groups_query = Group.query.join(UserGroupQuery).filter(UserGroupQuery.user_id == user_id)
 
     # Paginate users
-    paginated_groups, meta, links = paginate_query(groups_query, request.args, f"/v1/api/groups/{user_id}/users")
+    paginated_groups, meta, links = paginate_query(groups_query, request.args, f"{api_url_prefix}/groups/{user_id}/users")
 
     return (
         jsonify(

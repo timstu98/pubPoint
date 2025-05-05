@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from requests import Response
+from flask_cors import CORS
 
 from models import db, Pub, Group, User, UserGroupQuery
 import json
@@ -16,6 +17,7 @@ from api.routes.pubs_routes import pubs_routes
 from api.routes.users_routes import users_routes
 from api.routes.groups_routes import groups_routes
 from api.routes.user_group_queries_routes import user_group_queries_routes
+from api.routes.common import geocode_address
 
 ### Env variables
 load_dotenv(dotenv_path="/app/.env")
@@ -26,22 +28,26 @@ db_host = os.getenv("MYSQL_HOST", "mysql")  # "mysql" refers to the container na
 db_name = os.getenv("MYSQL_DATABASE", "db_name")
 # Get other enviroment variables
 API_KEY = os.getenv("API_KEY", "api_key")
+API_VERSION = os.getenv("API_VERSION", "vX")  # Add this line
 OUTPUT_PUBS_JSON = os.getenv("OUTPUT_JSON", "true").lower() == "true"
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+CORS(app)  # Enables CORS for all routes and origins
 db.init_app(app)
 migrate = Migrate(app, db)
 
 with app.app_context():
     db.create_all()
+    
+api_url_prefix = f"/api/{API_VERSION}"
 
 # Register the api routes blueprints
-app.register_blueprint(pubs_routes, url_prefix="/v1/api")
-app.register_blueprint(users_routes, url_prefix="/v1/api")
-app.register_blueprint(groups_routes, url_prefix="/v1/api")
-app.register_blueprint(user_group_queries_routes, url_prefix="/v1/api")
+app.register_blueprint(pubs_routes, url_prefix=api_url_prefix)
+app.register_blueprint(users_routes, url_prefix=api_url_prefix)
+app.register_blueprint(groups_routes, url_prefix=api_url_prefix)
+app.register_blueprint(user_group_queries_routes, url_prefix=api_url_prefix)
 
 
 @app.route("/test", methods=["GET"])
@@ -60,18 +66,6 @@ def get_table_data(table_object):
     return [item.get_as_dict() for item in table_data]
 
 
-# Geocode function to convert addresses to coordinates
-def geocode_address(address):
-    url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={API_KEY}"
-    response = requests.get(url)
-    data = response.json()
-    if "results" in data and data["results"]:
-        location = data["results"][0]["geometry"]["location"]
-        return location["lat"], location["lng"]
-    else:
-        return None
-
-
 # Calculate geometric center
 def calculate_centre(coordinates):
     latitudes = [lat for lat, lng in coordinates]
@@ -81,7 +75,7 @@ def calculate_centre(coordinates):
     return {"lat": center_lat, "lng": center_lng}
 
 
-@app.route("/api/get-centre", methods=["POST"])
+@app.route(f"{api_url_prefix}/get-centre", methods=["POST"])
 def get_centre():
     users = get_table_data(User)
 
@@ -98,8 +92,23 @@ def get_centre():
     return jsonify(centre)
 
 
+@app.route(f"{api_url_prefix}/geocode", methods=["GET"])
+def get_geocode():
+    address = request.args.get("address")
+    if not address:
+        return jsonify({"error": "Address parameter is required"}), 400
+    print(address)
+    
+    coords = geocode_address(address)
+    if coords:
+        print("coords")
+        return jsonify({"lat": coords[0], "lng": coords[1]})
+    print("end fail")
+    return jsonify({"error": "Could not geocode address"}), 400
+
+
 # https://developers.google.com/maps/documentation/routes/reference/rest
-@app.route("/api/get-journey-time", methods=["GET"])
+@app.route(f"{api_url_prefix}/get-journey-time", methods=["GET"])
 def get_journey_time():
     origin_lat = request.args.get("origin_lat")
     origin_lng = request.args.get("origin_lng")
@@ -137,7 +146,7 @@ def get_journey_time():
         return jsonify({"error": "Failed to retrieve journey time"}), 500
 
 
-@app.route("/api/get-journey-times", methods=["GET"])
+@app.route(f"{api_url_prefix}/get-journey-times", methods=["GET"])
 def get_journey_times():
     users = get_table_data(User)
     centre_response = get_centre().get_json()

@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 import os
 
 ALGORITHM_NAME = os.getenv("ALGORITHM_NAME", "geo-centre")
+API_VERSION = os.getenv("API_VERSION", "vX")
+api_url_prefix = f"/api/{API_VERSION}"
 
 groups_routes = Blueprint("groups_routes", __name__)
 
@@ -15,7 +17,7 @@ groups_routes = Blueprint("groups_routes", __name__)
 @groups_routes.route("/groups", methods=["GET"])
 def get_groups():
     groups_query = Group.query.all()
-    paginated_groups, meta, links = paginate_query(groups_query, request.args, "/v1/api/groups")
+    paginated_groups, meta, links = paginate_query(groups_query, request.args, f"{api_url_prefix}/groups")
     return (
         jsonify(
             create_success_response(
@@ -32,7 +34,7 @@ def get_groups():
 @groups_routes.route("/groups/<string:group_id>", methods=["GET"])
 def get_group(group_id):
     group = Group.query.get_or_404(group_id).get_as_dict()
-    data = {**group, "links": {"self": f"/v1/api/groups/{group_id}"}}
+    data = {**group, "links": {"self": f"{api_url_prefix}/groups/{group_id}"}}
     return (
         jsonify(
             create_success_response(
@@ -83,7 +85,7 @@ def create_group():
             "id": new_group.id,
             "type": "group",
             "attributes": {"suggested_pub_id": new_group.suggested_pub_id},
-            "links": {"self": f"v1/api/groups/{new_group.id}"},
+            "links": {"self": f"{api_url_prefix}/groups/{new_group.id}"},
         }
         return (
             jsonify(
@@ -131,7 +133,7 @@ def patch_group(group_id):
 
     try:
         db.session.commit()
-        data = {**group_query.get_as_dict(), "links": {"self": f"/v1/api/groups/{group_query.id}"}}
+        data = {**group_query.get_as_dict(), "links": {"self": f"{api_url_prefix}/groups/{group_query.id}"}}
 
         return (
             jsonify(
@@ -175,7 +177,7 @@ def put_group(group_id):
 
     try:
         db.session.commit()
-        data = {**group_query.get_as_dict(), "links": {"self": f"/v1/api/groups/{group_query.id}"}}
+        data = {**group_query.get_as_dict(), "links": {"self": f"{api_url_prefix}/groups/{group_query.id}"}}
         return (
             jsonify(
                 create_success_response(
@@ -199,7 +201,7 @@ def get_group_users(group_id):
     users_query = User.query.join(UserGroupQuery).filter(UserGroupQuery.group_id == group_id)
 
     # Paginate users
-    paginated_users, meta, links = paginate_query(users_query, request.args, f"/v1/api/groups/{group_id}/users")
+    paginated_users, meta, links = paginate_query(users_query, request.args, f"{api_url_prefix}/groups/{group_id}/users")
 
     return (
         jsonify(

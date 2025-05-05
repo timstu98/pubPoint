@@ -3,8 +3,11 @@ from models import db, UserGroupQuery
 from http import HTTPStatus
 from .common import create_success_response, paginate_query, create_error_response, create_error
 from uuid import uuid4
+import os
 
 # Relative import not necessary apparently.
+API_VERSION = os.getenv("API_VERSION", "vX")
+api_url_prefix = f"/api/{API_VERSION}"
 
 user_group_queries_routes = Blueprint("user_group_queries_routes", __name__)
 
@@ -12,7 +15,7 @@ user_group_queries_routes = Blueprint("user_group_queries_routes", __name__)
 @user_group_queries_routes.route("/user-group-queries", methods=["GET"])
 def get_user_group_queries():
     user_group_queries_query = UserGroupQuery.query.all()
-    paginated_users, meta, links = paginate_query(user_group_queries_query, request.args, "/v1/api/user-group-queries")
+    paginated_users, meta, links = paginate_query(user_group_queries_query, request.args, "{api_url_prefix}/user-group-queries")
     return (
         jsonify(
             create_success_response(
@@ -29,7 +32,7 @@ def get_user_group_queries():
 @user_group_queries_routes.route("/user-group-queries/<string:user_group_query_id>", methods=["GET"])
 def get_user_group_query(user_group_query_id):
     user_group_query = UserGroupQuery.query.get_or_404(user_group_query_id).get_as_dict()
-    data = {**user_group_query, "links": {"self": f"/v1/api/user-group-queries/{user_group_query_id}"}}
+    data = {**user_group_query, "links": {"self": f"{api_url_prefix}/user-group-queries/{user_group_query_id}"}}
     return (
         jsonify(
             create_success_response(
@@ -80,7 +83,7 @@ def create_user_group_query():
             "id": new_user_group_query.id,
             "type": "user",
             "attributes": {"user_id": new_user_group_query.user_id, "group_id": new_user_group_query.group_id},
-            "links": {"self": f"v1/api/user-group-queries/{new_user_group_query.id}"},
+            "links": {"self": f"{api_url_prefix}/user-group-queries/{new_user_group_query.id}"},
         }
         return (
             jsonify(
@@ -134,7 +137,7 @@ def patch_user_group_query(user_group_query_id):
 
     try:
         db.session.commit()
-        data = {**user_group_queries_query.get_as_dict(), "links": {"self": f"/v1/api/user-group-queries/{user_group_queries_query.id}"}}
+        data = {**user_group_queries_query.get_as_dict(), "links": {"self": f"{api_url_prefix}/user-group-queries/{user_group_queries_query.id}"}}
 
         return (
             jsonify(
@@ -179,7 +182,7 @@ def put_user_group_query(user_group_query_id):
 
     try:
         db.session.commit()
-        data = {**user_group_queries_query.get_as_dict(), "links": {"self": f"/v1/api/user-group-queries/{user_group_queries_query.id}"}}
+        data = {**user_group_queries_query.get_as_dict(), "links": {"self": f"{api_url_prefix}/user-group-queries/{user_group_queries_query.id}"}}
         return (
             jsonify(
                 create_success_response(
