@@ -55,6 +55,14 @@ eg.
 
 I have made various bash scripts which give other ways of running code inside a docker container (see `populate_pubs.sh` as an example).
 
+### Sharing the Database
+
+For initial development, I (TS) have been storing the database as a local persistent volume. I can share this as a one time mysql dump file to allow you to start developing. Ultimately, this will be hosted but is a sensible method of sharing for initial development.
+
+Instructions on this are below:
+
+`ADD INSTRUCTIONS!!!!!!`
+
 ###
 
 ## Commonly Encountered Issues
