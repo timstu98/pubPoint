@@ -1,5 +1,7 @@
 from flask import request
 import time
+import os
+import requests
 
 
 def create_success_response(data=None, message=None, links=None, meta=None, included=None):
@@ -70,3 +72,27 @@ def paginate_query(query, args, url_stem):
     }
 
     return paginated_items, meta, links
+
+
+def geocode_address(address):
+    """Utility function to geocode addresses using Google Maps API"""
+    API_KEY = os.getenv("API_KEY", "api_key")
+    url = f"https://maps.googleapis.com/maps/api/geocode/json"  
+    params = {
+        "address": address,
+        "key": API_KEY
+    }
+
+    try:
+        response = requests.get(url,params=params,timeout=5)
+        response.raise_for_status() # TODO(@TS): Understanf timeout and raise for status. Consdier wherelese they should be
+        data = response.json()
+        print(data)
+        if "results" in data and data["results"]:
+            location = data["results"][0]["geometry"]["location"]
+            return location["lat"], location["lng"]
+        print(f"Geocode address failed with error: {data["error_message"]}")
+        return None
+    except requests.RequestException as e:
+        print(f"[Geocode] Request failed: {e}")
+        return None

@@ -17,8 +17,9 @@ def register_algorithm(name):
 
 @register_algorithm("geo-centre")
 def geographical_centre(users, pubs):
-    print(users)
-    print(pubs)
+    # print(users)
+    # print(pubs)
+    print("Geo centre pub DEFAULT")
 
 
 @register_algorithm("simulated_annealing")

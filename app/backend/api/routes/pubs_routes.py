@@ -3,8 +3,11 @@ from models import db, Pub
 from http import HTTPStatus
 from .common import create_success_response, paginate_query, create_error_response, create_error
 from uuid import uuid4
+import os
 
 # Relative import not necessary apparently.
+API_VERSION = os.getenv("API_VERSION", "vX")
+api_url_prefix = f"/api/{API_VERSION}"
 
 pubs_routes = Blueprint("pubs_routes", __name__)
 
@@ -12,7 +15,7 @@ pubs_routes = Blueprint("pubs_routes", __name__)
 @pubs_routes.route("/pubs", methods=["GET"])
 def get_pubs():
     pubs_query = Pub.query.all()
-    paginated_pubs, meta, links = paginate_query(pubs_query, request.args, "/v1/api/pubs")
+    paginated_pubs, meta, links = paginate_query(pubs_query, request.args, "{api_url_prefix}/pubs")
     return (
         jsonify(
             create_success_response(
@@ -29,7 +32,7 @@ def get_pubs():
 @pubs_routes.route("/pubs/<string:pub_id>", methods=["GET"])
 def get_pub(pub_id):
     pub = Pub.query.get_or_404(pub_id).get_as_dict()
-    data = {**pub, "links": {"self": f"/v1/api/pubs/{pub_id}"}}
+    data = {**pub, "links": {"self": f"{api_url_prefix}/pubs/{pub_id}"}}
     return (
         jsonify(
             create_success_response(
@@ -80,7 +83,7 @@ def create_pub():
             "id": new_pub.id,
             "type": "pub",
             "attributes": {"name": new_pub.name, "address": new_pub.address},
-            "links": {"self": f"v1/api/pubs/{new_pub.id}"},
+            "links": {"self": f"{api_url_prefix}/pubs/{new_pub.id}"},
         }
         return (
             jsonify(
@@ -130,7 +133,7 @@ def patch_pub(pub_id):
 
     try:
         db.session.commit()
-        data = {**pub_query.get_as_dict(), "links": {"self": f"/v1/api/pubs/{pub_query.id}"}}
+        data = {**pub_query.get_as_dict(), "links": {"self": f"{api_url_prefix}/pubs/{pub_query.id}"}}
 
         return (
             jsonify(
@@ -175,7 +178,7 @@ def put_pub(pub_id):
 
     try:
         db.session.commit()
-        data = {**pub_query.get_as_dict(), "links": {"self": f"/v1/api/pubs/{pub_query.id}"}}
+        data = {**pub_query.get_as_dict(), "links": {"self": f"{api_url_prefix}/pubs/{pub_query.id}"}}
         return (
             jsonify(
                 create_success_response(
