@@ -1,20 +1,27 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "name": "Python: Docker Attach",
-        "type": "debugpy",
-        "request": "attach",
-        "connect": {
-          "host": "localhost",
-          "port": 5678
-        },
-        "pathMappings": [
-          {
-            "localRoot": "${workspaceFolder}/app/backend",
-            "remoteRoot": "/app"
-          }
-        ]
-      }
-    ]
-  }
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python Debugger: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python: Docker Attach",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5678
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/app/backend",
+          "remoteRoot": "/app"
+        }
+      ]
+    }
+  ]
+}
