@@ -8,7 +8,7 @@ from models import Pub, db
 from dotenv import load_dotenv
 import os
 from sqlalchemy.exc import IntegrityError
-from api.clients.maps.map_clients import IMapApi
+from api.clients.maps.map_clients import IPlacesApi
 
 if "/app" not in sys.path:
     print("Ensure you set the PYTHONPATH to ensure relative imports work correctly.")
@@ -62,7 +62,7 @@ def generate_rectangles(top_left, bottom_right, num_lat_divisions, num_lng_divis
     return rectangles
 
 
-def get_place_data_search_nearby(api:IMapApi, top_left, bottom_right, place_type="bar"):
+def get_place_data_search_nearby(api:IPlacesApi, top_left, bottom_right, place_type="bar"):
     location_restriction = {
         "rectangle": {
             "low": {"latitude": bottom_right[0], "longitude": top_left[1]},
@@ -85,7 +85,7 @@ def get_place_data_search_nearby(api:IMapApi, top_left, bottom_right, place_type
     return places_json
 
 
-def populate_pubs(api: IMapApi, top_left, bottom_right, num_lat_divisions, num_lng_divisions):
+def populate_pubs(api: IPlacesApi, top_left, bottom_right, num_lat_divisions, num_lng_divisions):
     # Generate rectangles.
     rectangles = generate_rectangles(top_left, bottom_right, num_lat_divisions, num_lng_divisions)
 
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     # num_lng_divisions = 2
     
     from app import app
-    from api.clients.maps.map_clients import GoogleApi, IMapApi
-    api = GoogleApi(API_KEY)
+    from api.clients.maps.map_clients import GooglePlacesApi, IPlacesApi
+    api = GooglePlacesApi(API_KEY)
     with app.app_context():
         populate_pubs(api, top_left, bottom_right, num_lat_divisions, num_lng_divisions)
