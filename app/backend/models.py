@@ -3,6 +3,7 @@ from uuid import uuid4
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.inspection import inspect
+from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import DECIMAL
 
 from api.clients.maps.routes_request import Coords
@@ -60,17 +61,24 @@ class UserGroupQuery(db.Model):
 class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.String(32), primary_key=True, unique=True, default=get_uuid)
-    address = db.Column(db.String(250), nullable=False)
-    first_name = db.Column(db.String(150), nullable=False)
-    second_name = db.Column(db.String(150), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(250), nullable=False)
+    address = db.Column(db.String(250), nullable=True)
+    first_name = db.Column(db.String(150), nullable=True)
+    second_name = db.Column(db.String(150), nullable=True)
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+        
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
     def get_as_dict(self):
         return {
             "id": self.id,
             "type": "user",
-            "attributes": {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs if c.key != "id"},
+            "attributes": {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs if c.key != "id" and c.key != "password"},
         }
-
 class Location(db.Model):
     __tablename__ = 'locations'
     __table_args__ = (
