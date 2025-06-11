@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from requests import Response
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 
 from models import db, Pub, Group, User, UserGroupQuery
 import json
@@ -17,6 +18,7 @@ from api.routes.pubs_routes import pubs_routes
 from api.routes.users_routes import users_routes
 from api.routes.groups_routes import groups_routes
 from api.routes.user_group_queries_routes import user_group_queries_routes
+from api.routes.auth_routes import auth_routes
 from api.routes.common import geocode_address
 
 ### Env variables
@@ -30,12 +32,15 @@ db_name = os.getenv("MYSQL_DATABASE", "db_name")
 API_KEY = os.getenv("API_KEY", "api_key")
 API_VERSION = os.getenv("API_VERSION", "vX")  # Add this line
 OUTPUT_PUBS_JSON = os.getenv("OUTPUT_JSON", "true").lower() == "true"
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret")  # Add a secret key for JWT
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["JWT_SECRET_KEY"] = JWT_SECRET_KEY  # Set JWT secret key
 CORS(app)  # Enables CORS for all routes and origins
 db.init_app(app)
+jwt = JWTManager(app)  # Initialize JWT
 migrate = Migrate(app, db)
 
 with app.app_context():
@@ -48,6 +53,7 @@ app.register_blueprint(pubs_routes, url_prefix=api_url_prefix)
 app.register_blueprint(users_routes, url_prefix=api_url_prefix)
 app.register_blueprint(groups_routes, url_prefix=api_url_prefix)
 app.register_blueprint(user_group_queries_routes, url_prefix=api_url_prefix)
+app.register_blueprint(auth_routes, url_prefix=api_url_prefix)
 
 
 @app.route("/test", methods=["GET"])
