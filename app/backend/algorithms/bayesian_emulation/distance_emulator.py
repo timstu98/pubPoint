@@ -71,16 +71,22 @@ def compute_distance_grid(emulator, start_x, start_y, x1, x2, y1, y2, grid_size=
     return X, Y, distances
 
 def plot_distance_grid(X, Y, distances, start_x, start_y, output_path):
+    # Convert metres to kilometres
+    X_km = X / 1000
+    Y_km = Y / 1000
+    start_x_km = start_x / 1000
+    start_y_km = start_y / 1000
+
     cmap = plt.get_cmap('RdBu')
     norm = TwoSlopeNorm(vmin=np.min(distances), vcenter=0, vmax=np.max(distances))
 
     plt.figure(figsize=(12, 8))
-    contour = plt.contourf(X, Y, distances, levels=50, cmap=cmap, norm=norm)
+    contour = plt.contourf(X_km, Y_km, distances, levels=50, cmap=cmap, norm=norm)
     plt.colorbar(contour, label='Distance from Start (hrs)')
 
-    plt.scatter(start_x, start_y, c='lime', s=200, marker='*', edgecolor='black', label='Start (Warwick Ave)')
-    plt.xlabel('X')
-    plt.ylabel('Y')
+    plt.scatter(start_x_km, start_y_km, c='lime', s=200, marker='*', edgecolor='black', label='Start (Warwick Ave)')
+    plt.xlabel('Distance East/West from Big Ben (km)')
+    plt.ylabel('Distance North/South from Big Ben (km)')
     plt.title('Distance from Start: Negative vs Positive', pad=20)
     plt.legend()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
