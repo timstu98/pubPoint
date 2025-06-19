@@ -9,13 +9,6 @@ import csv
 
 app, env = create_flask_app()
 
-# TODO check if these are needed
-# def get_engine():
-#     return create_engine(DATABASE_URI)
-# def get_session(engine):
-#     Session = sessionmaker(bind=engine)
-#     return Session()
-
 # Wrap database operations in app context
 with app.app_context():
     # Create tables if they don't exist
