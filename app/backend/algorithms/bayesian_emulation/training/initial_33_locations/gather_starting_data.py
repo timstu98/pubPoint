@@ -1,44 +1,20 @@
-import sys
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from flask import Flask 
+from algorithms.bayesian_emulation.utilities.create_flask_app import create_flask_app
 from models import db, Location, Distance
-from dotenv import load_dotenv
 import os
-from sqlalchemy.exc import IntegrityError
 from api.clients.maps.map_clients import GoogleRoutesApi
 from api.clients.maps.routes_request import RoutesRequest
 import csv
 
-if "/app" not in sys.path:
-    print("Ensure you set the PYTHONPATH to ensure relative imports work correctly.")
+app, env = create_flask_app()
 
-load_dotenv(dotenv_path="/app/.env")
-
-### Env variables
-DB_USER = os.getenv("MYSQL_USER", "user")
-DB_PASSWORD = os.getenv("MYSQL_PASSWORD", "password")
-DB_HOST = os.getenv("MYSQL_HOST", "mysql")
-DB_NAME = os.getenv("MYSQL_DATABASE", "DB_NAME")
-API_KEY = os.getenv("API_KEY", "api_key")
-DATABASE_URI = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
-TEST_FUNCTIONALITY_MODE = os.getenv("TEST_FUNCTIONALITY_MODE", "false").lower() == "true"
-
-# Initialize Flask app
-app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-# Initialize database
-db.init_app(app)
-
-def get_engine():
-    return create_engine(DATABASE_URI)
-
-
-def get_session(engine):
-    Session = sessionmaker(bind=engine)
-    return Session()
+# TODO check if these are needed
+# def get_engine():
+#     return create_engine(DATABASE_URI)
+# def get_session(engine):
+#     Session = sessionmaker(bind=engine)
+#     return Session()
 
 # Wrap database operations in app context
 with app.app_context():
@@ -88,7 +64,7 @@ with app.app_context():
                     if distance_in_db > 0:
                         continue
                 
-                api = GoogleRoutesApi(API_KEY)
+                api = GoogleRoutesApi(env["API_KEY"])
                 rqst = RoutesRequest([origin.coords], [destination.coords])
 
                 result = api.matrix(rqst)

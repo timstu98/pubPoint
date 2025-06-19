@@ -1,36 +1,14 @@
 from decimal import Decimal
-import sys
-from flask import Flask 
 from algorithms.bayesian_emulation.bayesian_emulator import BayesianEmulator
+from algorithms.bayesian_emulation.utilities.create_flask_app import create_flask_app
+from algorithms.bayesian_emulation.distance_emulator import DistanceEmulator
 from models import db, Location, Distance
-from dotenv import load_dotenv
 import os
 import csv
-import numpy as np
 from algorithms.bayesian_emulation.coord_transformer import CoordTransformer
 from model_extensions import BayesianModelExtensions
 
-if "/app" not in sys.path:
-    print("Ensure you set the PYTHONPATH to ensure relative imports work correctly.")
-
-load_dotenv(dotenv_path="/app/.env")
-
-### Env variables
-DB_USER = os.getenv("MYSQL_USER", "user")
-DB_PASSWORD = os.getenv("MYSQL_PASSWORD", "password")
-DB_HOST = os.getenv("MYSQL_HOST", "mysql")
-DB_NAME = os.getenv("MYSQL_DATABASE", "DB_NAME")
-API_KEY = os.getenv("API_KEY", "api_key")
-DATABASE_URI = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
-TEST_FUNCTIONALITY_MODE = os.getenv("TEST_FUNCTIONALITY_MODE", "false").lower() == "true"
-
-# Initialize Flask app
-app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-# Initialize database
-db.init_app(app)
+app, env = create_flask_app()
 
 def get_distance(origin, destination):
     if origin == destination:
@@ -104,4 +82,12 @@ with app.app_context():
             if diff > 10:
                 raise f"Error in training Bayesian Emulator - predictions of distance for training data over 10 seconds different from provided values. {origin.name}-{destination.name} returned difference of {diff}"
                 
-    BayesianModelExtensions.insert_bayesian_model("initial-set-5", M, x_train, D, Beta, sigma, theta)
+    BayesianModelExtensions.insert_bayesian_model("initial-set-12", M, x_train, D, Beta, sigma, theta)
+
+    DistanceEmulator.generate_distance_plot(
+        bayesian_model_name="initial-set-12",
+        start_x=-4173,
+        start_y=2407,
+        start_name="Start (Warwick Ave)"
+    )
+

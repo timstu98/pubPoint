@@ -1,5 +1,5 @@
 param (
-    [string]$ContainerName = "38e1087136eea9b9c6011bec7079827aed9444cd237de6be84a2d10049f92761",
+    [string]$ContainerName = "pubpoint-backend-1",
     [string]$LocalPath = "C:\Users\tcvin\OneDrive\Documents\pubPoint\Plots",
     [string]$ContainerFilePath = "/tmp/plot.png",
     [string]$FileName = "plot"
