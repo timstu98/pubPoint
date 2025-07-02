@@ -81,7 +81,7 @@ with app.app_context():
 
     x_scaled = Scaler.scale(x_train)  
         
-    Beta = np.mean(D)
+    Beta = 45*60 # "everywhere is 45 minutes away" - someone, probably
     #tuner = GPHyperparameterTuner(x_train, D, Beta)
     #theta, sigma = tuner.tune()
     theta, sigma = 0.2, 20 #hardcoded results from above optimisation
