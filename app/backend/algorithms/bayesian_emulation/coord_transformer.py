@@ -1,4 +1,5 @@
 from pyproj import Transformer
+import numpy as np
 
 class CoordTransformer:
     def __init__(self):
@@ -8,12 +9,20 @@ class CoordTransformer:
         Then use this to calculate the distance north/east of each point from Big Ben (51.5007,0.1246)
         '''
         self.transformer = Transformer.from_crs("EPSG:4326", "EPSG:27700")
-        self.reverseTransformer = Transformer.from_crs("EPSG:27700", "EPSG:4326")
+        self.reverse_transformer = Transformer.from_crs("EPSG:27700", "EPSG:4326")
+        self.xy_to_wm_trandformer = Transformer.from_crs("EPSG:27700", "EPSG:3857")
         self.x_base, self.y_base, _ = self.transformer.transform(51.5007,-0.1246, 0)
     def transform(self, lat, lng):
         x, y, _ = self.transformer.transform(lat, lng, 0)
         return x-self.x_base, y-self.y_base
     
     def transformBack(self, x, y):
-        lat, lng, _ = self.reverseTransformer.transform(x+self.x_base, y+self.y_base, 0)
+        lat, lng, _ = self.reverse_transformer.transform(x+self.x_base, y+self.y_base, 0)
         return lat, lng
+    
+    def transformToWm(self, x, y):
+        x_wm, y_wm, _ = self.reverse_transformer.transform(x+self.x_base, y+self.y_base, np.zeros_like(x))
+        return x_wm, y_wm
+    
+    def transformToEPSG(self, x, y):
+        return x+self.x_base, y+self.y_base

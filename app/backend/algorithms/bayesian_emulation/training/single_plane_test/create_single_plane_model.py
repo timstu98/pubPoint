@@ -100,7 +100,7 @@ with app.app_context():
             raise Exception(f"Difference in emulated to training data is {diff}")
 
 
-    BayesianModelExtensions.insert_bayesian_model("single-plane-1-in-3-sigma-20", M, x_scaled, D, Beta, sigma, theta)
+    # BayesianModelExtensions.insert_bayesian_model("single-plane-1-in-3-sigma-20", M, x_scaled, D, Beta, sigma, theta)
 
     DistanceEmulator.generate_distance_plot(
         emulator=bayesianEmulator,
