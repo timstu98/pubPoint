@@ -18,13 +18,14 @@ class DistanceEmulator:
         start_x: int,
         start_y: int,
         start_name: str,
-        output_path: str = "/tmp/plot.png"
+        output_path: str = "/tmp/plot.png",
+        x_min: float = -15000,
+        x_max: float = 10000,
+        y_min: float = -8000,
+        y_max: float = 8000,
+        D_scaler: float = 1
     ):
-        # Grid boundaries (fixed)
-        x1, y1 = -15000, -8000
-        x2, y2 = 10000, 8000
-
-        X, Y, distances = compute_distance_grid(emulator, start_x, start_y, x1, x2, y1, y2)
+        X, Y, distances = compute_distance_grid(emulator, start_x, start_y, x_min, x_max, y_min, y_max, D_scaler=D_scaler)
         plot_distance_grid(X, Y, distances, start_x, start_y, output_path, start_name)
 
 
@@ -79,7 +80,7 @@ def prepare_emulator(model: BayesianModel) -> BayesianEmulator:
 
     return BayesianEmulator(model.beta, model.sigma, model.theta, x_train, D, M)
 
-def compute_distance_grid(emulator, start_x, start_y, x1, x2, y1, y2, grid_size=100):
+def compute_distance_grid(emulator, start_x, start_y, x1, x2, y1, y2, grid_size=100, D_scaler=1):
     x_vals = np.linspace(x1, x2, grid_size)
     y_vals = np.linspace(y1, y2, grid_size)
     X, Y = np.meshgrid(x_vals, y_vals)
@@ -92,6 +93,6 @@ def compute_distance_grid(emulator, start_x, start_y, x1, x2, y1, y2, grid_size=
 
     for i in range(grid_size):
         for j in range(grid_size):
-            emulated =  emulator.emulate([start_x_scaled, start_y_scaled, X_scaled[i, j], Y_scaled[i, j]]) / 3600  # Convert to hours
+            emulated =  D_scaler * emulator.emulate([start_x_scaled, start_y_scaled, X_scaled[i, j], Y_scaled[i, j]]) / 3600  # Convert to hours
             distances[i, j] = emulated
     return X, Y, distances

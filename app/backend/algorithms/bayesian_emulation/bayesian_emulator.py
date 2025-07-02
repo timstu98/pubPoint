@@ -36,7 +36,7 @@ class BayesianEmulator:
         self.x_train = np.array(x_train, dtype=np.float64)
         self.D = np.array(D, dtype=np.float64)
         self.M = np.array(M, dtype=np.float64)
-        self.noise_var = 1e-12
+        self.noise_var = 1e-6
 
     def compute_M(self):
         """
@@ -51,12 +51,12 @@ class BayesianEmulator:
         sq_dists = np.sum((X[:, np.newaxis, :] - X[np.newaxis, :, :])**2, axis=-1)
         
         # Compute covariance matrix K, Var[D] = sigma^2 e^{||x^(j)-x^(k)||^2 / theta^2}
+        # TODO - other papers seem to use 2*theta^2 here (and below), may need to investigate
         K = (self.sigma ** 2) * np.exp(-sq_dists / (self.theta ** 2))
 
-        # don't use nugget for now
         # nugget: either user‑provided noise_var or tiny jitter
-        # nugget = self.noise_var #+ 1e-10 * np.var(self.D)
-        # K[np.diag_indices(n)] += nugget
+        nugget = self.noise_var
+        K[np.diag_indices(n)] += nugget
 
         # Cholesky factor
         L = np.linalg.cholesky(K)

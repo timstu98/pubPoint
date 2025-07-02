@@ -24,3 +24,4 @@ numpy==2.2.3
 pyproj==3.7.1
 mpmath==1.3.0
 matplotlib==3.10.1
+scipy==1.16.0

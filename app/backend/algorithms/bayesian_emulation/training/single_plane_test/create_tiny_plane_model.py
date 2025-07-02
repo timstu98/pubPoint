@@ -5,11 +5,11 @@ from algorithms.bayesian_emulation.bayesian_emulator import BayesianEmulator
 from algorithms.bayesian_emulation.utilities.create_flask_app import create_flask_app
 from algorithms.bayesian_emulation.distance_emulator import DistanceEmulator
 from algorithms.bayesian_emulation.utilities.scaler import Scaler
+from algorithms.bayesian_emulation.gp_hyperparameter_tuner import GPHyperparameterTuner
 from models import db, Location, Distance
 import os
 import csv
 from algorithms.bayesian_emulation.coord_transformer import CoordTransformer
-from algorithms.bayesian_emulation.gp_hyperparameter_tuner import GPHyperparameterTuner
 from model_extensions import BayesianModelExtensions
 
 app, env = create_flask_app()
@@ -54,14 +54,15 @@ with app.app_context():
                 lng=-0.18382667001350628
             )
     
+    x_min, x_max = -5000, -3000
+    y_min, y_max = 2000, 3000
+    
     count = 1
     for x in x_range:
         for y in y_range:
-            if count == 3:
-                count = 1
-            else:
-                count+=1
+            if (x < x_min or x > x_max or y < y_min or y > y_max):
                 continue
+
             name = f"Plane_WA_{x}_{y}"
             location = Location.query.filter(
                 db.func.lower(Location.name) == name.lower()
@@ -73,39 +74,44 @@ with app.app_context():
     transformer = CoordTransformer()
     x_train = [] # Training Points, X_A
     D = [] # Known outputs, f(X_A)
+    D_scaler = 1
     for destination in locations:
         x_j = to_x_input(origin, destination, transformer)
-        d_j = get_distance(origin, destination)
+        d_j = get_distance(origin, destination) / D_scaler
         x_train.append(x_j)
         D.append(d_j)
 
-    x_scaled = Scaler.scale(x_train)  
+    x_scaled = Scaler.scale(x_train)    
         
     Beta = np.mean(D)
-    #tuner = GPHyperparameterTuner(x_train, D, Beta)
-    #theta, sigma = tuner.tune()
-    theta, sigma = 0.2, 20 #hardcoded results from above optimisation
+    tuner = GPHyperparameterTuner(x_train, D, Beta)
+    theta, sigma = tuner.tune()
     print(f"Optimal theta: {theta}, sigma: {sigma}")
-    
+
     bayesianEmulator = BayesianEmulator(Beta, sigma, theta, x_scaled, D)
     M = bayesianEmulator.compute_M()
     
     for destination in locations:
         x_j = to_x_input(origin, destination, transformer)
         x_j_scaled = Scaler.scale(x_j)
-        emulated = bayesianEmulator.emulate(x_j_scaled)
+        emulated = bayesianEmulator.emulate(x_j_scaled) * D_scaler
         d_j = float(get_distance(origin, destination))
         diff = emulated - d_j
-        if (diff > 20*60): # allow no more than 20 minutes difference at worst point
+        if (diff > 120):
             raise Exception(f"Difference in emulated to training data is {diff}")
 
 
-    BayesianModelExtensions.insert_bayesian_model("single-plane-1-in-3-sigma-20", M, x_scaled, D, Beta, sigma, theta)
+    # BayesianModelExtensions.insert_bayesian_model("single_plane_2", M, x_scaled, D, Beta, sigma, theta)
 
     DistanceEmulator.generate_distance_plot(
         emulator=bayesianEmulator,
         start_x=-4173,
         start_y=2407,
-        start_name="Start (Warwick Ave)"
+        start_name="Start (Warwick Ave)",
+        x_min=x_min,
+        x_max=x_max,
+        y_min=y_min,
+        y_max=y_max,
+        D_scaler=D_scaler
     )
 
