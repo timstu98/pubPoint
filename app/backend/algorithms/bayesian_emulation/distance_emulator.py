@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 
+from algorithms.bayesian_emulation.utilities.scaler import Scaler
 from models import BayesianModel
 from model_extensions import BayesianModelExtensions
 from algorithms.bayesian_emulation.bayesian_emulator import BayesianEmulator
@@ -13,15 +14,12 @@ from api.clients.maps.routes_request import Coords
 class DistanceEmulator:
     @staticmethod
     def generate_distance_plot(
-        bayesian_model_name: str,
+        emulator: BayesianEmulator,
         start_x: int,
         start_y: int,
         start_name: str,
         output_path: str = "/tmp/plot.png"
     ):
-        model = BayesianModelExtensions.get_bayesian_model_by_name(bayesian_model_name)
-        emulator = prepare_emulator(model)
-
         # Grid boundaries (fixed)
         x1, y1 = -15000, -8000
         x2, y2 = 10000, 8000
@@ -38,8 +36,14 @@ def plot_distance_grid(X, Y, distances, start_x, start_y, output_path, start_nam
     start_x_km = start_x / 1000
     start_y_km = start_y / 1000
 
+    distances = np.clip(distances, 0, 5)
+
     cmap = plt.get_cmap('RdBu')
-    norm = TwoSlopeNorm(vmin=np.min(distances), vcenter=0, vmax=np.max(distances))
+    
+    if (np.min(distances) < 0):
+        norm = TwoSlopeNorm(vmin=np.min(distances), vcenter=0, vmax=np.max(distances))
+    else: 
+        norm = TwoSlopeNorm(vmin=0, vcenter=0.001, vmax=np.max(distances))
 
     plt.figure(figsize=(12, 8))
     contour = plt.contourf(X_km, Y_km, distances, levels=50, cmap=cmap, norm=norm)
@@ -79,9 +83,15 @@ def compute_distance_grid(emulator, start_x, start_y, x1, x2, y1, y2, grid_size=
     x_vals = np.linspace(x1, x2, grid_size)
     y_vals = np.linspace(y1, y2, grid_size)
     X, Y = np.meshgrid(x_vals, y_vals)
-    distances = np.zeros_like(X)
+
+    start_x_scaled, start_y_scaled = Scaler.scale([start_x,start_y])
+    x_vals_scaled = Scaler.scale_x(x_vals)
+    y_vals_scaled = Scaler.scale_y(y_vals)
+    X_scaled, Y_scaled = np.meshgrid(x_vals_scaled, y_vals_scaled)
+    distances = np.zeros_like(X_scaled)
 
     for i in range(grid_size):
         for j in range(grid_size):
-            distances[i, j] = emulator.emulate([start_x, start_y, X[i, j], Y[i, j]]) / 3600  # Convert to hours
+            emulated =  emulator.emulate([start_x_scaled, start_y_scaled, X_scaled[i, j], Y_scaled[i, j]]) / 3600  # Convert to hours
+            distances[i, j] = emulated
     return X, Y, distances

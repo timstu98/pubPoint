@@ -2,6 +2,7 @@ from decimal import Decimal
 from algorithms.bayesian_emulation.bayesian_emulator import BayesianEmulator
 from algorithms.bayesian_emulation.utilities.create_flask_app import create_flask_app
 from algorithms.bayesian_emulation.distance_emulator import DistanceEmulator
+from algorithms.bayesian_emulation.utilities.scaler import Scaler
 from models import db, Location, Distance
 import os
 import csv
@@ -64,17 +65,20 @@ with app.app_context():
             x_train.append(x_j)
             D.append(d_j)
 
+    x_scaled = Scaler.scale(x_train)
+
     Beta = 45 # Beta = E[f(x)] : "everywhere in London is 45 minutes away" - someone, probably
     sigma = 1 # sigma = standard deviation : estimate
-    theta = 5000 # theta = correlation-scale of the gaussian process : estimate
+    theta = 0.1 # theta = correlation-scale of the gaussian process : estimate
 
-    bayesianEmulator = BayesianEmulator(Beta, sigma, theta, x_train, D)
+    bayesianEmulator = BayesianEmulator(Beta, sigma, theta, x_scaled, D)
 
     M = bayesianEmulator.compute_M()
 
     for origin in locations:
         for destination in locations:
-            emulated = bayesianEmulator.emulate(to_x_input(origin, destination, transformer))
+            x_j = Scaler.scale(to_x_input(origin, destination, transformer))
+            emulated = bayesianEmulator.emulate(x_j)
             d_j = float(get_distance(origin, destination))
 
             diff = emulated - d_j
@@ -82,10 +86,10 @@ with app.app_context():
             if diff > 10:
                 raise f"Error in training Bayesian Emulator - predictions of distance for training data over 10 seconds different from provided values. {origin.name}-{destination.name} returned difference of {diff}"
                 
-    BayesianModelExtensions.insert_bayesian_model("initial-set-12", M, x_train, D, Beta, sigma, theta)
+    BayesianModelExtensions.insert_bayesian_model("initial-set-16", M, x_scaled, D, Beta, sigma, theta) #TODO resave this with x_scaled not x_train
 
     DistanceEmulator.generate_distance_plot(
-        bayesian_model_name="initial-set-12",
+        emulator=bayesianEmulator,
         start_x=-4173,
         start_y=2407,
         start_name="Start (Warwick Ave)"

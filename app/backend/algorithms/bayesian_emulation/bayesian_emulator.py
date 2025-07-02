@@ -36,6 +36,7 @@ class BayesianEmulator:
         self.x_train = np.array(x_train, dtype=np.float64)
         self.D = np.array(D, dtype=np.float64)
         self.M = np.array(M, dtype=np.float64)
+        self.noise_var = 1e-12
 
     def compute_M(self):
         """
@@ -43,20 +44,33 @@ class BayesianEmulator:
         """
         self.x_train = np.array(self.x_train)
         self.D = np.array(self.D)
+        X = self.x_train
+        n = len(X)
         
         # Compute pairwise squared (Euclidean) distances, ||x^(j)-x^(k)||^2
-        X = self.x_train
         sq_dists = np.sum((X[:, np.newaxis, :] - X[np.newaxis, :, :])**2, axis=-1)
         
         # Compute covariance matrix K, Var[D] = sigma^2 e^{||x^(j)-x^(k)||^2 / theta^2}
         K = (self.sigma ** 2) * np.exp(-sq_dists / (self.theta ** 2))
+
+        # don't use nugget for now
+        # nugget: either user‑provided noise_var or tiny jitter
+        # nugget = self.noise_var #+ 1e-10 * np.var(self.D)
+        # K[np.diag_indices(n)] += nugget
+
+        # Cholesky factor
+        L = np.linalg.cholesky(K)
         
         # Center the outputs D by subtracting beta, D - E[D]
         y = self.D - self.beta
         
-        # Solve for M = K^{-1} y
-        self.M = np.linalg.solve(K, y)
-        
+        # # Solve for M = K^{-1} y
+        # self.M = np.linalg.solve(K, y)
+
+        # Solve for M = K^{-1} y using L Lᵀ M = y
+        z = np.linalg.solve(L, y)
+        self.M = np.linalg.solve(L.T, z)
+            
         return self.M
 
     def emulate(self, x):

@@ -15,5 +15,5 @@ class CoordTransformer:
         return x-self.x_base, y-self.y_base
     
     def transformBack(self, x, y):
-        lat, lng, _ = self.reverseTransformer.transform(x+self.x_base, y+self.y_base)
+        lat, lng, _ = self.reverseTransformer.transform(x+self.x_base, y+self.y_base, 0)
         return lat, lng

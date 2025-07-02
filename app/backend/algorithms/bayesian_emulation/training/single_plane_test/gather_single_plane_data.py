@@ -17,25 +17,31 @@ with app.app_context():
 
     locations = []
 
-    x_range = np.linspace(-15000, 10000, 100)
-    y_range = np.linspace(-8000, 8000, 100)
+    x_range = np.linspace(-15000, 10000, 70)
+    y_range = np.linspace(-8000, 8000, 70)
 
     transformer = CoordTransformer()
+
+    origin, new = Location.get_or_create(
+            name="Warwick Avenue",
+            lat=51.52323337318014,
+            lng=-0.18382667001350628
+        )
 
     for x in x_range:
         for y in y_range:
             lat, lng = transformer.transformBack(x,y)
         
-        name = "Plane_WA_{x}_{y}"
+            name = f"Plane_WA_{x}_{y}"
 
-        # Use get_or_create to create or retrieve the Location object
-        location, new = Location.get_or_create(
-            name=name,
-            lat=lat,
-            lng=lng
-        )
+            # Use get_or_create to create or retrieve the Location object
+            location, new = Location.get_or_create(
+                name=name,
+                lat=lat,
+                lng=lng
+            )
 
-        locations.append(location)
+            locations.append(location)
 
     # Commit once after all locations are processed
     try:
@@ -47,44 +53,46 @@ with app.app_context():
     
         # this should work but need to test transformer works correctly first!
 
-    # for origin in locations:
-    #     for destination in locations:
-    #         try:
-    #             if origin == destination:
-    #                 continue
+    count = len(locations)
 
-    #             # Get or create the distance relationship
-    #             distance_entry, isNew = Distance.get_or_create(origin, destination)
+    if count > 5000:
+        raise f"cannot run {count} requests!"
 
-    #             if not isNew:
-    #                 distance_in_db = distance_entry.seconds
-    #                 if distance_in_db > 0:
-    #                     continue
+    for destination in locations:
+        try:
+            
+            # Get or create the distance relationship
+            distance_entry, isNew = Distance.get_or_create(origin, destination)
+
+            if not isNew:
+                distance_in_db = distance_entry.seconds
+                if distance_in_db > 0:
+                    continue
+            
+            api = GoogleRoutesApi(env["API_KEY"])
+            rqst = RoutesRequest([origin.coords], [destination.coords])
+
+            result = api.matrix(rqst)
+            if result:
                 
-    #             api = GoogleRoutesApi(env["API_KEY"])
-    #             rqst = RoutesRequest([origin.coords], [destination.coords])
-
-    #             result = api.matrix(rqst)
-    #             if result:
-                    
-    #                 # Update with API results
-    #                 distance_entry.update_distance(
-    #                     meters=result[0]['distanceMeters'],
-    #                     seconds=result[0]['staticDuration'].rstrip('s')
-    #                 )
-                    
-    #                 # Commit the distance update
-    #                 db.session.commit()
-    #                 print(f"Successfully wrote distance: {distance_entry.origin_id} -> {distance_entry.destination_id} = {distance_entry.seconds}s")
-                    
-    #                 # Verify write
-    #                 stored_distance = Distance.query.filter_by(
-    #                     origin_id=origin.id,
-    #                     destination_id=destination.id
-    #                 ).first()
-                    
-    #                 print(f"Database contains: {stored_distance.meters}m between locations")
-                    
-    #         except Exception as e:
-    #             db.session.rollback()
-    #             print(f"Error processing distance: {e}")
+                # Update with API results
+                distance_entry.update_distance(
+                    meters=result[0]['distanceMeters'],
+                    seconds=result[0]['staticDuration'].rstrip('s')
+                )
+                
+                # Commit the distance update
+                db.session.commit()
+                print(f"Successfully wrote distance: {distance_entry.origin_id} -> {distance_entry.destination_id} = {distance_entry.seconds}s")
+                
+                # Verify write
+                stored_distance = Distance.query.filter_by(
+                    origin_id=origin.id,
+                    destination_id=destination.id
+                ).first()
+                
+                print(f"Database contains: {stored_distance.meters}m between locations")
+                
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error processing distance: {e}")
