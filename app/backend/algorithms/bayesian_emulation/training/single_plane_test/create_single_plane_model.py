@@ -54,14 +54,14 @@ with app.app_context():
                 lng=-0.18382667001350628
             )
     
-    count = 1
+    # count = 1
     for x in x_range:
         for y in y_range:
-            if count == 3:
-                count = 1
-            else:
-                count+=1
-                continue
+            # if count == 3:
+            #     count = 1
+            # else:
+            #     count+=1
+            #     continue
             name = f"Plane_WA_{x}_{y}"
             location = Location.query.filter(
                 db.func.lower(Location.name) == name.lower()
@@ -100,7 +100,7 @@ with app.app_context():
             raise Exception(f"Difference in emulated to training data is {diff}")
 
 
-    # BayesianModelExtensions.insert_bayesian_model("single-plane-1-in-3-sigma-20", M, x_scaled, D, Beta, sigma, theta)
+    BayesianModelExtensions.insert_bayesian_model("single-plane-full", M, x_scaled, D, Beta, sigma, theta)
 
     DistanceEmulator.generate_distance_plot(
         emulator=bayesianEmulator,

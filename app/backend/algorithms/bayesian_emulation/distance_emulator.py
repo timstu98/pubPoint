@@ -27,8 +27,8 @@ class DistanceEmulator:
         D_scaler: float = 1
     ):
         X, Y, distances = compute_distance_grid(emulator, start_x, start_y, x_min, x_max, y_min, y_max, D_scaler=D_scaler)
-        # plot_distance_grid(X, Y, distances, start_x, start_y, output_path+"-old.png", start_name)
-        plot_map(X, Y, distances, start_x, start_y, output_path+".png", start_name)
+        plot_distance_grid(X, Y, distances, start_x, start_y, output_path+".png", start_name)
+        plot_map(X, Y, distances, start_x, start_y, output_path+"-map.png", start_name)
 
 def plot_map(X, Y, distances, start_x, start_y, output_path, start_name):
     transformer = CoordTransformer()
