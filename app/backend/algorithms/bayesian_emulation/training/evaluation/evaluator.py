@@ -116,6 +116,9 @@ with app.app_context():
     for name, diff in sorted[:10]:
         print(f"{name}: {diff:.2f} seconds")
 
+    print("Mean difference:", np.mean([d[1] for d in diffs]))
+    print("Max difference:", np.max([d[1] for d in diffs]))
+
     ResultsPlotter.generate_diffs_plot(
         np.array(x_train, dtype=float)[:, 2],
         np.array(x_train, dtype=float)[:, 3],
