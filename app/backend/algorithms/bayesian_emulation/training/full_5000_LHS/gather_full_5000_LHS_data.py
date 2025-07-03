@@ -4,41 +4,39 @@ from models import db, Location, Distance
 from api.clients.maps.map_clients import GoogleRoutesApi
 from api.clients.maps.routes_request import RoutesRequest
 from algorithms.bayesian_emulation.coord_transformer import CoordTransformer
+from scipy.stats import qmc
 
 app, env = create_flask_app()
 
 with app.app_context():
-    # Create tables if they don't exist
-    db.create_all()
-    
-
     locations = []
 
-    x_range = np.linspace(-15000, 10000, 70)
-    y_range = np.linspace(-8000, 8000, 70)
+    x_bounds = [-15000, 10000]  # for both origin_x and destination_x
+    y_bounds = [-8000, 8000]    # for both origin_y and destination_y
 
     transformer = CoordTransformer()
+    num_samples = 5000 # stick within free limit of Google API
+    seed = 123 
 
-    origin, new = Location.get_or_create(
-            name="Warwick Avenue",
-            lat=51.52323337318014,
-            lng=-0.18382667001350628
-        )
+    # Create 4D LHS
+    sampler = qmc.LatinHypercube(d=4, seed=seed)
+    sample = sampler.random(n=num_samples)
 
-    for x in x_range:
-        for y in y_range:
-            lat, lng = transformer.transformBack(x,y)
+    # Scale each dimension
+    bounds = [x_bounds, y_bounds, x_bounds, y_bounds]
+    scaled_sample = qmc.scale(sample, [b[0] for b in bounds], [b[1] for b in bounds])
+
+    for i, (ox, oy, dx, dy) in enumerate(scaled_sample):
+        origin_lat, origin_lng = transformer.transformBack(ox, oy)
+        dest_lat, dest_lng = transformer.transformBack(dx, dy)
+    
+        origin_name = f"LHS_Origin_{i}"
+        dest_name = f"LHS_Dest_{i}"
         
-            name = f"Plane_WA_{x}_{y}"
+        origin, _ = Location.get_or_create(name=origin_name, lat=origin_lat, lng=origin_lng)
+        destination, _ = Location.get_or_create(name=dest_name, lat=dest_lat, lng=dest_lng)
 
-            # Use get_or_create to create or retrieve the Location object
-            location, new = Location.get_or_create(
-                name=name,
-                lat=lat,
-                lng=lng
-            )
-
-            locations.append(location)
+        locations.append((origin, destination))
 
     # Commit once after all locations are processed
     try:
@@ -53,10 +51,8 @@ with app.app_context():
     if count > 5000:
         raise f"cannot run {count} requests!"
 
-    for destination in locations:
+    for origin, destination in locations:
         try:
-            
-            # Get or create the distance relationship
             distance_entry, isNew = Distance.get_or_create(origin, destination)
 
             if not isNew:
@@ -86,7 +82,7 @@ with app.app_context():
                     destination_id=destination.id
                 ).first()
                 
-                print(f"Database contains: {stored_distance.meters}m between locations")
+                print(f"Database contains: {stored_distance.seconds}s between locations")
                 
         except Exception as e:
             #db.session.rollback()

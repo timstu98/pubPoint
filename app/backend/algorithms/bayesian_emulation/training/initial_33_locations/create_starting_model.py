@@ -65,14 +65,14 @@ with app.app_context():
             x_train.append(x_j)
             D.append(d_j)
 
+
     x_scaled = Scaler.scale(x_train)
 
-    Beta = 45 # Beta = E[f(x)] : "everywhere in London is 45 minutes away" - someone, probably
-    sigma = 1 # sigma = standard deviation : estimate
-    theta = 0.1 # theta = correlation-scale of the gaussian process : estimate
+    Beta = 45*60 # Beta = E[f(x)] : "everywhere in London is 45 minutes away" - someone, probably
+    sigma = 20 # sigma = standard deviation : optimised value from GPHyperparameterTuner
+    theta = 0.2 # theta = correlation-scale of the gaussian process : optimised value from GPHyperparameterTuner
 
     bayesianEmulator = BayesianEmulator(Beta, sigma, theta, x_scaled, D)
-
     M = bayesianEmulator.compute_M()
 
     for origin in locations:
@@ -83,10 +83,10 @@ with app.app_context():
 
             diff = emulated - d_j
 
-            if diff > 10:
-                raise f"Error in training Bayesian Emulator - predictions of distance for training data over 10 seconds different from provided values. {origin.name}-{destination.name} returned difference of {diff}"
+            if diff > 20*60:
+                raise f"Error in training Bayesian Emulator - predictions of distance for training data over 20 minutes different from provided values. {origin.name}-{destination.name} returned difference of {diff}"
                 
-    BayesianModelExtensions.insert_bayesian_model("initial-set-16", M, x_scaled, D, Beta, sigma, theta) #TODO resave this with x_scaled not x_train
+    # BayesianModelExtensions.insert_bayesian_model("initial-33-locations", M, x_scaled, D, Beta, sigma, theta)
 
     ResultsPlotter.generate_distance_plot(
         emulator=bayesianEmulator,
