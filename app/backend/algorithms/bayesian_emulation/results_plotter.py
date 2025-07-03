@@ -156,6 +156,8 @@ def plot_diffs_grid(diff_x, diff_y, diffs,start_x, start_y, output_path, start_n
 def plot_diffs_map(diff_x, diff_y, diffs,start_x, start_y, output_path, start_name):
     transformer = CoordTransformer()
 
+    diffs = diffs / 3600  # Convert to hours
+
     plt.figure(figsize=(12, 8))
     
     # transform to EPSG coords
