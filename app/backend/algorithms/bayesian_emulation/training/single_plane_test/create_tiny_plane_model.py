@@ -3,7 +3,7 @@ from decimal import Decimal
 import numpy as np
 from algorithms.bayesian_emulation.bayesian_emulator import BayesianEmulator
 from algorithms.bayesian_emulation.utilities.create_flask_app import create_flask_app
-from algorithms.bayesian_emulation.distance_emulator import DistanceEmulator
+from algorithms.bayesian_emulation.results_plotter import ResultsPlotter
 from algorithms.bayesian_emulation.utilities.scaler import Scaler
 from algorithms.bayesian_emulation.gp_hyperparameter_tuner import GPHyperparameterTuner
 from models import db, Location, Distance
@@ -103,7 +103,7 @@ with app.app_context():
 
     # BayesianModelExtensions.insert_bayesian_model("single_plane_2", M, x_scaled, D, Beta, sigma, theta)
 
-    DistanceEmulator.generate_distance_plot(
+    ResultsPlotter.generate_distance_plot(
         emulator=bayesianEmulator,
         start_x=-4173,
         start_y=2407,

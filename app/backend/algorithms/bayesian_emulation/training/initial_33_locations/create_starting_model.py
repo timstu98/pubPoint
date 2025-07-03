@@ -1,7 +1,7 @@
 from decimal import Decimal
 from algorithms.bayesian_emulation.bayesian_emulator import BayesianEmulator
 from algorithms.bayesian_emulation.utilities.create_flask_app import create_flask_app
-from algorithms.bayesian_emulation.distance_emulator import DistanceEmulator
+from algorithms.bayesian_emulation.results_plotter import ResultsPlotter
 from algorithms.bayesian_emulation.utilities.scaler import Scaler
 from models import db, Location, Distance
 import os
@@ -88,7 +88,7 @@ with app.app_context():
                 
     BayesianModelExtensions.insert_bayesian_model("initial-set-16", M, x_scaled, D, Beta, sigma, theta) #TODO resave this with x_scaled not x_train
 
-    DistanceEmulator.generate_distance_plot(
+    ResultsPlotter.generate_distance_plot(
         emulator=bayesianEmulator,
         start_x=-4173,
         start_y=2407,

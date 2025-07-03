@@ -1,4 +1,5 @@
 from decimal import Decimal
+from algorithms.bayesian_emulation.bayesian_emulator import BayesianEmulator
 from models import BayesianModel, DElement, XTrainElement, MVectorElement, db
 
 from decimal import Decimal
@@ -171,3 +172,21 @@ class BayesianModelExtensions:
             db.session.commit()
 
         return True
+    
+    @staticmethod
+    def prepare_emulator(model: BayesianModel) -> BayesianEmulator:
+        x_train = []
+        row = []
+        row_index = 0
+        for el in model.x_train_elements:
+            if el.row > row_index:
+                x_train.append(row)
+                row = []
+                row_index += 1
+            row.append(el.value)
+        x_train.append(row)
+
+        D = [el.value for el in model.d_elements]
+        M = [el.value for el in model.m_vector_elements]
+
+        return BayesianEmulator(model.beta, model.sigma, model.theta, x_train, D, M)
