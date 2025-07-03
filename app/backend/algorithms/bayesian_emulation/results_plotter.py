@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import Normalize, TwoSlopeNorm
+from matplotlib.colors import LinearSegmentedColormap, Normalize, TwoSlopeNorm
 import contextily as ctx
 
 from algorithms.bayesian_emulation.utilities.scaler import Scaler
@@ -65,7 +65,7 @@ def plot_map(X, Y, distances, start_x, start_y, output_path, start_name):
 
     # Plot contour
     contour = plt.contourf(X, Y, distances, levels=50, cmap='viridis', norm=norm, alpha=0.8)
-    plt.colorbar(contour, label='Distance from Start (hrs)')
+    plt.colorbar(contour, label='Travel Time from Start (hrs)')
 
     # Plot start point, convert to EPSG
     sx, sy = transformer.transformToEPSG(start_x, start_y)
@@ -100,12 +100,12 @@ def plot_distance_grid(X, Y, distances, start_x, start_y, output_path, start_nam
 
     plt.figure(figsize=(12, 8))
     contour = plt.contourf(X_km, Y_km, distances, levels=50, cmap=cmap, norm=norm)
-    plt.colorbar(contour, label='Distance from Start (hrs)')
+    plt.colorbar(contour, label='Travel Time from Start (hrs)')
 
     plt.scatter(start_x_km, start_y_km, c='lime', s=200, marker='*', edgecolor='black', label=start_name)
     plt.xlabel('Distance East/West from Big Ben (km)')
     plt.ylabel('Distance North/South from Big Ben (km)')
-    plt.title('Distance from Start: Negative vs Positive', pad=20)
+    plt.title('Travel Time from Start: Negative vs Positive', pad=20)
     plt.legend()
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.show()
@@ -138,10 +138,15 @@ def plot_diffs_grid(diff_x, diff_y, diffs,start_x, start_y, output_path, start_n
 
     plt.figure(figsize=(12, 8))
 
-    diff_norm = TwoSlopeNorm(vmin=diffs.min(), vcenter=0, vmax=diffs.max())
+    max_diff = max(np.max(np.abs(diffs)), -np.min(np.abs(diffs)))
+    max_rnd = float(Decimal(max_diff * 2).to_integral_value(rounding='ROUND_CEILING') / Decimal(2))
+
+    diff_norm = TwoSlopeNorm(vmin=-max_rnd, vcenter=0, vmax=max_rnd)
+
+    # Create the scatter plot
     sc = plt.scatter(
-        diff_x_km, diff_y_km, c=diffs, cmap='coolwarm',
-        norm=diff_norm, s=50, edgecolor='black', linewidth=0.5,
+        diff_x_km, diff_y_km, c=diffs, cmap='coolwarm', norm=diff_norm,
+        s=250, edgecolor='black', linewidth=0.5, marker='o',
         label='Emulator–Model Δ'
     )
     plt.scatter(start_x_km, start_y_km, c='lime', s=200, marker='*', edgecolor='black', label=start_name)
@@ -162,10 +167,16 @@ def plot_diffs_map(diff_x, diff_y, diffs,start_x, start_y, output_path, start_na
     
     # transform to EPSG coords
     dx_epsg, dy_epsg = transformer.transformToEPSG(diff_x, diff_y)
-    diff_norm = TwoSlopeNorm(vmin=diffs.min(), vcenter=0, vmax=diffs.max())
+
+    max_diff = max(np.max(np.abs(diffs)), -np.min(np.abs(diffs)))
+    max_rnd = float(Decimal(max_diff * 2).to_integral_value(rounding='ROUND_CEILING') / Decimal(2))
+
+    diff_norm = TwoSlopeNorm(vmin=-max_rnd, vcenter=0, vmax=max_rnd)
+
+    # Create the scatter plot
     sc = plt.scatter(
         dx_epsg, dy_epsg, c=diffs, cmap='coolwarm', norm=diff_norm,
-        s=60, edgecolor='white', linewidth=0.5, marker='o',
+        s=250, edgecolor='black', linewidth=0.5, marker='o',
         label='Emulator–Model Δ'
     )
 
@@ -177,7 +188,8 @@ def plot_diffs_map(diff_x, diff_y, diffs,start_x, start_y, output_path, start_na
 
     # Add basemap (OpenStreetMap)
     ctx.add_basemap(plt.gca(), crs="EPSG:27700", source=ctx.providers.OpenStreetMap.Mapnik)
-
+    plt.gca().images[-1].set_alpha(0.8)  # Set alpha to 80% transparency
+    
     plt.gca().set_xlabel('')
     plt.gca().set_ylabel('')
     plt.gca().set_xticks([])
