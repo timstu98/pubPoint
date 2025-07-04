@@ -6,7 +6,7 @@ from decimal import Decimal
 
 class BayesianModelExtensions:
     @staticmethod
-    def insert_bayesian_model(name, m_vector, x_train, d_vector, beta, sigma, theta, commit=True):
+    def insert_bayesian_model(name, m_vector, x_train, d_vector, beta, sigma, theta, noise=None, is_logged=None, commit=True):
         """
         Insert a BayesianModel into the database.
         
@@ -30,6 +30,8 @@ class BayesianModelExtensions:
         beta = Decimal(str(beta))
         sigma = Decimal(str(sigma))
         theta = Decimal(str(theta))
+        noise = Decimal(str(noise)) if noise is not None else None
+        is_logged = bool(is_logged) if is_logged is not None else False
 
         # Create the BayesianModel entry
         new_emulation = BayesianModel(
@@ -38,7 +40,9 @@ class BayesianModelExtensions:
             d_length=len(d_vector),
             beta=beta,
             sigma=sigma,
-            theta=theta
+            theta=theta,
+            noise=noise,
+            is_logged=is_logged
         )
         db.session.add(new_emulation)
 
@@ -189,4 +193,4 @@ class BayesianModelExtensions:
         D = [el.value for el in model.d_elements]
         M = [el.value for el in model.m_vector_elements]
 
-        return BayesianEmulator(model.beta, model.sigma, model.theta, x_train, D, M)
+        return BayesianEmulator(model.beta, model.sigma, model.theta, x_train, D, M, model.noise, model.is_logged)

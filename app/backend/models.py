@@ -3,7 +3,7 @@ from uuid import uuid4
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.inspection import inspect
-from sqlalchemy import DECIMAL
+from sqlalchemy import DECIMAL, Boolean
 
 from api.clients.maps.routes_request import Coords
 
@@ -191,6 +191,8 @@ class BayesianModel(db.Model):
     beta = db.Column(DECIMAL(precision=30, scale=15), nullable=False)
     sigma = db.Column(DECIMAL(precision=30, scale=15), nullable=False)
     theta = db.Column(DECIMAL(precision=30, scale=15), nullable=False)
+    noise = db.Column(DECIMAL(precision=30, scale=15), nullable=True)
+    is_logged = db.Column(Boolean, nullable=True)
     
 class MVectorElement(db.Model):
     __tablename__ = "m_vector_elements"

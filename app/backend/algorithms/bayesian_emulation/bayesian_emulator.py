@@ -1,7 +1,7 @@
 import numpy as np
 
 class BayesianEmulator:
-    def __init__(self, beta, sigma, theta, x_train, D, M=None):
+    def __init__(self, beta, sigma, theta, x_train, D, M=None, noise=None, is_logged=None):
         '''
         Creates a Bayesian Emulator for predicting the results of an expensive simulator (such as a Maps API)
 
@@ -34,9 +34,10 @@ class BayesianEmulator:
         self.sigma = np.array(sigma, dtype=np.float64)
         self.theta = np.array(theta, dtype=np.float64)
         self.x_train = np.array(x_train, dtype=np.float64)
-        self.D = np.array(D, dtype=np.float64)
         self.M = np.array(M, dtype=np.float64)
-        self.noise_var = 1e-6
+        self.noise_var = np.float64(noise) if noise is not None else 1e-6
+        self.is_logged = is_logged if is_logged is not None else False
+        self.D = np.log(np.array(D, dtype=np.float64)) if self.is_logged else np.array(D, dtype=np.float64) 
 
     def compute_M(self):
         """
@@ -92,4 +93,6 @@ class BayesianEmulator:
         k = (self.sigma ** 2) * np.exp(-sq_dists / (self.theta ** 2))
         
         # Calculate the emulated mean, E_D[f(x)] = E[f(x)] + Cov[f(x),D] Var[D]^-1(D - E[D])
-        return self.beta + np.dot(k, self.M)
+        result = self.beta + np.dot(k, self.M)
+
+        return np.exp(result) if self.is_logged else result
