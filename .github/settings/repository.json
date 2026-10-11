@@ -1,0 +1,10 @@
+{
+  "allow_merge_commit": true,
+  "allow_squash_merge": false,
+  "allow_rebase_merge": false,
+  "allow_auto_merge": false,
+  "delete_branch_on_merge": true,
+  "allow_update_branch": true,
+  "use_squash_pr_title_as_default": false,
+  "web_commit_signoff_required": false
+}
