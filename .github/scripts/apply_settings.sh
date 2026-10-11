@@ -10,4 +10,4 @@ gh api \
   --input .github/settings/repository.json \
   --silent
 
-./bash_scripts/apply_main_ruleset.sh
+.github/scripts/apply_ruleset.sh
