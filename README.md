@@ -96,6 +96,8 @@ docker cp pubpoint-backend-1:/tmp/plot2.png ./plot2.png
 - Backend (`app/backend`, with Python dependencies installed): `python3 -m unittest discover -s test -p '*_tests.py'`.
 
 ## Contributing
+After cloning, run `bash setup_repo.sh` to enable the pre-commit checks.
+
 Hot reload has been enabled on both front and backend.
 
 Docker desktop must be opened before running `docker-compose up`.
