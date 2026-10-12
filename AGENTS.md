@@ -1,0 +1,27 @@
+# pubPoint agent instructions
+
+## Project
+
+- This is a Docker Compose application with frontend, backend, and MySQL services.
+- Backend code and migrations live under `app/backend`.
+- Frontend code lives under `app/frontend`.
+
+## Setup and development
+
+See `README.md` for setup, development, and verification commands. Read `docs/README.md` to find product requirements, architecture guidance, and decision records relevant to the task.
+
+## Scripts
+
+- Use `bash_scripts` for host-side Bash helpers, `pwsh_scripts` for PowerShell equivalents, and `docker_scripts` for scripts run inside the backend container.
+- GitHub automation belongs in `.github/scripts`; keep it separate from developer workflow scripts.
+- When adding a script, place it in the folder matching where and how it runs, and keep equivalent Bash and PowerShell helpers aligned when both are provided.
+
+## Working agreements
+
+- When a GitHub issue is provided, use it for task scope and status. Record durable architectural and product decisions in `docs/`, linking them from the relevant issue when one exists.
+- Update the README when setup or development commands change.
+- Before considering a change complete, run the most relevant available tests or checks and report anything not run.
+
+## Code review
+
+Review changes against the relevant issue, when provided, and the project conventions and documents indexed in `docs/README.md`.

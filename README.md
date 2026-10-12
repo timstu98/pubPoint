@@ -90,6 +90,11 @@ docker cp pubpoint-backend-1:/tmp/plot2.png ./plot2.png
 
 ### Populate as issues are found
 
+## Checks
+
+- Frontend (`app/frontend`, with dependencies installed): `npm run lint` and `npm run build`.
+- Backend (`app/backend`, with Python dependencies installed): `python3 -m unittest discover -s test -p '*_tests.py'`.
+
 ## Contributing
 Hot reload has been enabled on both front and backend.
 
