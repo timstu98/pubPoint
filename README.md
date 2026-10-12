@@ -63,7 +63,28 @@ Instructions on this are below:
 
 `ADD INSTRUCTIONS!!!!!!`
 
-###
+## Instructions for Initialising and Testing Bayesian Emulator
+
+### MacOS and Linux
+
+Change docker image name and model name as appropriate.
+
+#### Initialising
+
+```bash
+# 1. Add Locations to db
+docker exec -t pubpoint-backend-1 python algorithms/bayesian_emulation/training/gather_starting_data.py
+# 2. Create starting model
+docker exec -t pubpoint-backend-1 python algorithms/bayesian_emulation/training/create_starting_model.py -m initial-set-1
+```
+
+### Testing
+
+```bash
+# Viewing distances from Warwick Avenue
+docker exec -t pubpoint-backend-1 python algorithms/bayesian_emulation/distance_emulator.py -m initial-set-1
+docker cp pubpoint-backend-1:/tmp/plot2.png ./plot2.png
+```
 
 ## Commonly Encountered Issues
 
