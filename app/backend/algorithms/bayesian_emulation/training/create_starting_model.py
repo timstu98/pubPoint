@@ -1,6 +1,6 @@
 from decimal import Decimal
 import sys
-from flask import Flask 
+from flask import Flask
 from algorithms.bayesian_emulation.bayesian_emulator import BayesianEmulator
 from models import db, Location, Distance
 from dotenv import load_dotenv
@@ -9,6 +9,7 @@ import csv
 import numpy as np
 from algorithms.bayesian_emulation.coord_transformer import CoordTransformer
 from model_extensions import BayesianModelExtensions
+import argparse
 
 if "/app" not in sys.path:
     print("Ensure you set the PYTHONPATH to ensure relative imports work correctly.")
@@ -32,19 +33,19 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # Initialize database
 db.init_app(app)
 
+
 def get_distance(origin, destination):
     if origin == destination:
         return 0
     else:
         distance_entry = Distance.query.filter_by(
-                    origin_id=origin.id,
-                    destination_id=destination.id
-                ).first()
+            origin_id=origin.id, destination_id=destination.id
+        ).first()
 
         if not distance_entry:
             raise Exception(f"Cannot find distance for {origin} -> {destination}")
-            
         return distance_entry.seconds
+
 
 def to_x_input(origin, destination, transformer):
     x_origin, y_origin = transformer.transform(origin.lat, origin.lng)
@@ -53,23 +54,27 @@ def to_x_input(origin, destination, transformer):
         Decimal(str(x_origin)),  # Convert via string to avoid floating-point inaccuracies
         Decimal(str(y_origin)),
         Decimal(str(x_dest)),
-        Decimal(str(y_dest))
+        Decimal(str(y_dest)),
     ]
 
-with app.app_context():    
+
+with app.app_context():
+    parser = argparse.ArgumentParser(description="Create a starting Bayesian model.")
+    parser.add_argument(
+        "-m", "--model_name", required=True, help="The name of the model to create."
+    )
+    args = parser.parse_args()
+
+    model_name = args.model_name  # Get the model name from the argument
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    csv_file_path = os.path.join(current_dir, 'data', 'starting_locations.csv')
+    csv_file_path = os.path.join(current_dir, "data", "starting_locations.csv")
 
     locations = []
-    with open(csv_file_path, mode='r', newline='', encoding='utf-8') as file:
+    with open(csv_file_path, mode="r", newline="", encoding="utf-8") as file:
         reader = csv.DictReader(file)
-        
         for row in reader:
-            name = row['Name']
-            
-            location = Location.query.filter(
-                db.func.lower(Location.name) == name.lower()
-            ).first()
+            name = row["Name"]
+            location = Location.query.filter(db.func.lower(Location.name) == name.lower()).first()
 
             if not location:
                 raise Exception(f"Cannot find location {name}")
@@ -77,8 +82,8 @@ with app.app_context():
             locations.append(location)
 
     transformer = CoordTransformer()
-    x_train = [] # Training Points, X_A
-    D = [] # Known outputs, f(X_A)
+    x_train = []  # Training Points, X_A
+    D = []  # Known outputs, f(X_A)
     for origin in locations:
         for destination in locations:
             x_j = to_x_input(origin, destination, transformer)
@@ -86,9 +91,9 @@ with app.app_context():
             x_train.append(x_j)
             D.append(d_j)
 
-    Beta = 45 # Beta = E[f(x)] : "everywhere in London is 45 minutes away" - someone, probably
-    sigma = 1 # sigma = standard deviation : estimate
-    theta = 5000 # theta = correlation-scale of the gaussian process : estimate
+    Beta = 45  # Beta = E[f(x)] : "everywhere in London is 45 minutes away" - someone, probably
+    sigma = 1  # sigma = standard deviation : estimate
+    theta = 5000  # theta = correlation-scale of the gaussian process : estimate
 
     bayesianEmulator = BayesianEmulator(Beta, sigma, theta, x_train, D)
 
@@ -103,5 +108,5 @@ with app.app_context():
 
             if diff > 10:
                 raise f"Error in training Bayesian Emulator - predictions of distance for training data over 10 seconds different from provided values. {origin.name}-{destination.name} returned difference of {diff}"
-                
-    BayesianModelExtensions.insert_bayesian_model("initial-set-5", M, x_train, D, Beta, sigma, theta)
+
+    BayesianModelExtensions.insert_bayesian_model(model_name, M, x_train, D, Beta, sigma, theta)
