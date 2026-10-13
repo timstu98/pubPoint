@@ -11,3 +11,6 @@ venv
 Planning Documents/
 .vscode/*
 !.vscode/launch.json
+
+# Per-PR worktrees
+/.worktree/

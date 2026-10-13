@@ -6,6 +6,7 @@ Keep each fact or decision canonical in one document. Use links between document
 
 ## Where information belongs
 
+- [`development/ai-workflow.md`](development/ai-workflow.md) - repeatable ticket exploration, implementation, review, and handoff workflow.
 - [`product.md`](product.md) — product vision, MVP scope, and requirements.
 - [`decisions/`](decisions/) — durable choices and the reasoning behind them.
 - [`development/`](development/) — implementation context, API and backend guidance, database notes, and supporting research.

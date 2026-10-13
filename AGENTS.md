@@ -18,6 +18,7 @@ See `README.md` for setup, development, and verification commands. Read `docs/RE
 
 ## Working agreements
 
+- When exploring a ticket, implementing a feature or fix, reviewing changes, or handing off work, follow [the AI development workflow](docs/development/ai-workflow.md).
 - When a GitHub issue is provided, use it for task scope and status. Record durable architectural and product decisions in `docs/`, linking them from the relevant issue when one exists.
 - Update the README when setup or development commands change.
 - Before considering a change complete, run the most relevant available tests or checks and report anything not run.
