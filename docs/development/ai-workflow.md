@@ -44,9 +44,13 @@ Fix defects introduced by the current change within its scope. Separate pre-exis
 
 ## 2. Implement the agreed slice
 
-Create a separate branch and worktree for each PR under the repository root's gitignored `.worktree/` folder. From the primary checkout, use `git fetch origin` and `git worktree add -b <branch> .worktree/<task-name> origin/main`. If the branch already exists, use `git worktree add .worktree/<task-name> <branch>` once it is no longer checked out elsewhere. Use a different base only when the task has an agreed dependency on another branch.
+Default to working in the primary repository checkout. Before starting a new task, check its branch and `git status --short`, including staged, unstaged, and untracked files.
 
-Run edits, checks, commits, and pushes from the task's worktree. Follow the repository's [setup and contribution guidance](../../README.md); a new worktree needs its own local configuration and dependencies. Preserve unrelated local changes and existing worktrees. Implement in focused increments and run relevant checks as work progresses.
+- If the primary checkout is clean, create or switch to the task's feature branch there and proceed. Base independent work on the latest `origin/main`; use another base for an agreed dependency. Working in the primary checkout does not mean committing directly to `main`.
+- If it has uncommitted changes, summarise the affected files and ask the developer whether to use a worktree, finish or otherwise resolve the existing changes first, or switch to a new branch carrying those changes. Wait for that choice before changing branches or files. Switching branches can carry uncommitted changes with it; it does not isolate them. Commit, stash, move, or discard existing changes only as agreed with the developer.
+- Create or use a worktree only when the developer explicitly requests it for the task or PR. Put new worktrees under the primary checkout's gitignored `.worktree/` folder. From the primary checkout, use `git worktree add -b <branch> .worktree/<task-name> origin/main`, or `git worktree add .worktree/<task-name> <branch>` for an existing branch that is not checked out elsewhere.
+
+Run edits, checks, commits, and pushes from the chosen checkout. Follow the repository's [setup and contribution guidance](../../README.md); a new worktree needs its own local configuration and dependencies. Preserve unrelated local changes and existing worktrees. Implement in focused increments and run relevant checks as work progresses.
 
 Add meaningful tests for changed behaviour, failure cases, and regressions. Use existing test patterns where suitable. If a new dependency, architecture choice, blocker, or scope increase changes the agreed approach, present the decision and update the brief before doing the dependent work. Continue independent work where possible.
 
