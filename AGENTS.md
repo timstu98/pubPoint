@@ -24,6 +24,10 @@ See `README.md` for setup, development, and verification commands. Read `docs/RE
 - Update the README when setup or development commands change.
 - Before considering a change complete, run the most relevant available tests or checks and report anything not run.
 
+## GitHub pull requests
+
+- When creating a pull request related to a GitHub issue, append its reference in square brackets (for example, `[#123]`) to the end of the PR title. Omit the reference when the PR is unrelated to an issue.
+
 ## Code review
 
 Review changes against the relevant issue, when provided, and the project conventions and documents indexed in `docs/README.md`.
