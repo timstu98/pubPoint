@@ -1,6 +1,6 @@
-# London Pub Population Research
+# Pub database population
 
-This note records the research and working assumptions behind the pub population utility. The durable implementation decision is recorded in [`docs/decisions/001-populate-pubs-search.md`](../decisions/001-populate-pubs-search.md).
+This note records the research and working assumptions behind the pub population utility. The durable implementation decision is recorded in [`docs/decisions/001-populate-pubs-search.md`](../../decisions/001-populate-pubs-search.md).
 
 ## Goals
 

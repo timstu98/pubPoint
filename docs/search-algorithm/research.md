@@ -1,6 +1,6 @@
 # Pub recommendation algorithm research
 
-This document holds the assumptions, cost baseline, and background for approaches considered for suggesting a venue. The [product goals](../product.md#what-makes-a-better-recommendation) define recommendation quality; the [MVP plan](mvp.md) records the current approach.
+This document holds the assumptions, cost baseline, and background for approaches considered for suggesting a venue. The [product goals](../product/vision.md#what-makes-a-better-recommendation) define recommendation quality; the [MVP plan](mvp.md) records the current approach.
 
 ## Problem
 
@@ -25,7 +25,7 @@ Checking every venue for every person gives `N_p × N_u` journeys. With 3,500 pu
 | Google Routes, traffic-aware (Pro) | $10 per 1,000 journeys |                      $140 |
 | Mapbox Directions or Matrix        |  $2 per 1,000 journeys |                       $28 |
 
-For Google Compute Route Matrix and Mapbox Matrix, each origin-destination result is billable. Batching results into fewer requests does not reduce this estimate. TravelTime uses fixed annual commercial licence pricing, so its public rates do not yield a per-search cost. The provider and transport modes have not been selected; these figures are comparison estimates. Mapbox [Directions](https://docs.mapbox.com/api/navigation/directions/) and [Matrix](https://docs.mapbox.com/api/navigation/matrix/) support driving, walking, and cycling, but not public transit, so their rate does not cover every transport choice the product may need. See [API cost research](../development/api-cost-research.md) for provider pricing and the [business case](../business-case.md) for costs at smaller candidate counts.
+For Google Compute Route Matrix and Mapbox Matrix, each origin-destination result is billable. Batching results into fewer requests does not reduce this estimate. TravelTime uses fixed annual commercial licence pricing, so its public rates do not yield a per-search cost. The provider and transport modes have not been selected; these figures are comparison estimates. Mapbox [Directions](https://docs.mapbox.com/api/navigation/directions/) and [Matrix](https://docs.mapbox.com/api/navigation/matrix/) support driving, walking, and cycling, but not public transit, so their rate does not cover every transport choice the product may need. See [API cost research](../development/research/api-cost-research.md) for provider pricing.
 
 ## Methods considered
 

@@ -1,6 +1,6 @@
 # MVP algorithm plan
 
-The [algorithm research](research.md) holds the assumptions, cost baseline, and background to the methods considered. The [product goals](../product.md#what-makes-a-better-recommendation) define what a better recommendation means. This plan records the current approach and may change as we test it.
+The [algorithm research](research.md) holds the assumptions, cost baseline, and background to the methods considered. The [product goals](../product/vision.md#what-makes-a-better-recommendation) define what a better recommendation means. This plan records the current approach and may change as we test it.
 
 ## Initial baseline
 
