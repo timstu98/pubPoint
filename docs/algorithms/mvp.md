@@ -1,28 +1,29 @@
 # MVP algorithm plan
 
-The [algorithm research](research.md) holds the assumptions, cost baseline, and background to the methods considered. This plan records the current approach and may change as we test it.
+The [algorithm research](research.md) holds the assumptions, cost baseline, and background to the methods considered. The [product goals](../product.md#what-makes-a-better-recommendation) define what a better recommendation means. This plan records the current approach and may change as we test it.
 
-## MVP approach
+## Initial baseline
 
 For the MVP, we need a simple algorithm that can suggest pubs quickly. This gives us a clear target for getting the product into users' hands, while leaving room to explore new ideas and improve the recommendations during development.
 
-Start with the pub nearest the geographic centre of the group's starting locations. This is quick to implement and gives us a baseline. Geographic distance may be a poor proxy for travel time, especially in London, so we expect to improve on this approach.
+Given the group's starting locations and a requested number of venues, calculate their geographic centre and select that many nearby pubs or bars. For the MVP, start with three options so the group has a choice. Calculate each participant's journey to each venue using their selected transport mode, then rank the venues by total group journey time. This gives the group travel times to compare. Because the shortlist is based on geographic distance, it could miss better meeting points on London's transport network.
 
-We should explore other approaches during MVP development, including:
+## Experiments
+
+Explore other approaches during MVP development:
 
 - Narrow the candidate pubs before checking journeys, for example by considering only pubs within a bounding box around the group's locations, or randomly sampling a small number with a bias towards preset transfer hubs. We could then compare actual journeys to the shortlisted pubs.
 - Try simulated annealing. It may give a better answer than the geographic centre with fewer API calls than brute force, though it could still be too costly as a long-term solution.
 - Use precomputed travel-time graphs, potentially for different times of day and transport modes, to shortlist pubs. Then use live routing information to choose among them.
+- For demos, consider a precomputed set of recommended pubs to show the product vision.
 
-Options we are setting aside for the MVP:
+## Deferred methods
 
-- Brute force is too costly for routine searches. Under the lowest rate in our [cost baseline](research.md#brute-force-cost-baseline), checking 3,500 pubs for a group of four costs $28 per search. It could later serve as a benchmark for tests or monitoring.
+- Brute force is too costly for routine searches: routing alone can cost tens of dollars or more per search for a group of four. See the [cost baseline](research.md#brute-force-cost-baseline). It could later serve as a benchmark for tests or monitoring.
 - Bayesian inference would take more work to develop. We will revisit it when Tim Viney is available to work on the approach.
 
-For demos, we could use a precomputed set of recommended pubs to show the product vision.
-
-## Implementation
+## Testing and evaluation
 
 Use a strategy pattern to make it easy to switch between and compare methods.
 
-Set up repeatable test scenarios to catch changes in each method's behaviour and compare the quality of its suggestions. Where we know the best pub for a scenario, measure how far each method's result is from it, using total journey time or another metric we choose to optimise.
+Set up repeatable scenarios that serve as unit tests for each search method and as evaluation cases for comparing their suggestions. Use the unit tests to catch changes in behaviour. For evaluation, measure total journey time first, then how evenly journey times are shared across the group. Also record routing calls and response time so we can judge the cost of an improvement. Where a scenario has a known best option under these measures, compare each method's result with it.
