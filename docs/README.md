@@ -8,7 +8,7 @@ Keep each fact or decision canonical in one document. Use links between document
 
 | Path | Purpose |
 | --- | --- |
-| [`product/`](product/) | [Vision](product/vision.md) and [product MVP requirements](product/mvp.md): what users should be able to do, including scope and journeys. |
+| [`product/`](product/) | [Vision](product/vision.md), [product MVP requirements](product/mvp.md), and the [business case](product/business-case.md). |
 | [`search-algorithm/`](search-algorithm/) | Venue recommendation research, the cost baseline, and the evolving [algorithm MVP plan](search-algorithm/mvp.md): how we currently intend to suggest venues. |
 | [`development/`](development/) | General engineering guidance: [workflow](development/ai-workflow.md), architecture, API, and database. |
 | [`development/research/`](development/research/) | Supporting investigations into [provider costs](development/research/api-cost-research.md) and [pub database population](development/research/pub-database-population.md). |
