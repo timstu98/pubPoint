@@ -1,23 +1,6 @@
-# Product
+# MVP
 
 Status: proposed
-
-## Product vision
-
-For groups of friends in London, it is difficult to find the best venue. It's difficult to work out the best location for everyone to travel to. It's difficult to know good venues in these locations. It adds friction to people spending time together. Currently, there is no service for groups that helps with this. PubPoint will fill that gap. This problem is much harder in large cities like London, where public transport can mean that the most equal or best-located venue will not always be in the middle of the group in terms of geographic centre. PubPoint will suggest the best and fairest venue for them to travel to. Eventually, it will allow them to filter for things they want, like dog-friendly, pub garden, kitchen open now, and good cocktails. Our market is people living in large cities with complex travel networks who want to spend time with their friends or family.
-
-## Problem and opportunity
-
-- What problem or need are users experiencing?
-  Groups of friends struggle to find venues that are well located for everyone in the group and hit all the criteria they're looking for.
-- How do they handle it today?
-  Currently, people spend lots of time in group chats discussing their current locations, discussing venues they know that are good, researching the venue and negotiating with each other about where they will be going.
-- What makes solving it worthwhile?
-  Friends will love reducing friction in choosing places to meet up. They'll spend more time together, go to better venues, and have better times.
-
-## Target users
-
-This problem is much greater for people and groups in cities with complicated transport networks: large cities like London, Tokyo, Paris, Singapore. The people I envisage using the app are social people: people that want to hang out with their friends and people who want to associate with the brand. I think initially I see this for people who are social, younger people who are tech-savvy and want to spend more time with their friends.
 
 ## MVP outcomes and success
 
@@ -40,7 +23,7 @@ Tracks an initial list of things that we want the product to do and, more critic
 - Flexible groups, which act as the starting point of searches but allow dynamic adjustment
 - Flexible user state for searches, where the home address, work address, custom address, or current location can be easily swapped by any member within their search
 - Minimal-friction method to amend groups for or create ad hoc searches
-- Searching for and comparing pubs or bars for a group
+- Searching for and comparing pubs or bars in London for a group
 - Persistent user home address and transport settings
 - Viewing travel information and opening external route planners
 
@@ -55,6 +38,7 @@ Tracks an initial list of things that we want the product to do and, more critic
 - Allowing users to change preferences for the search algorithm (e.g., one person is happy to travel further, dislike certain areas)
 - Group-specific default starting location for a user - just have a default on the user level
 - Venues other than pubs or bars
+- Venue searches outside London
 - Route finding in app
 - Live venue information
 - Suggesting alternative efficient transport methods for different users in a group to a venue (E.g., it would be faster to walk than take the bus to a venue.)
@@ -64,9 +48,9 @@ Tracks an initial list of things that we want the product to do and, more critic
 
 ## User journeys
 
-The following section covers the main user journeys for the MVP. Detailed user flows can be documented separately and linked from here. Technical design belongs in [`development/`](development/).
+The following section covers the main user journeys for the MVP. Detailed user flows can be documented separately and linked from here. Technical design belongs in [`development/`](../development/).
 
-Actions describe the user's steps; variations describe alternative paths to that outcome. System capabilities describe the responsibilities needed to make the journey possible, with technical design recorded in [`development/`](development/).
+Actions describe the user's steps; variations describe alternative paths to that outcome. System capabilities describe the responsibilities needed to make the journey possible, with technical design recorded in [`development/`](../development/).
 
 ### Sign up and get started
 
@@ -95,7 +79,7 @@ Actions describe the user's steps; variations describe alternative paths to that
 
 ### Find a venue for a meetup
 
-**Scenario:** A person starts a search from a saved group or an ad hoc set of participants, adjusts their starting locations and transport choices, and compares suggestions to choose a suitable pub or bar.
+**Scenario:** A person starts a search from a saved group or an ad hoc set of participants, adjusts their starting locations and transport choices, and compares suggestions to choose a suitable pub or bar in London.
 
 **Starting conditions:** The person knows who they want to include and can access the saved group if using one.
 
@@ -129,7 +113,7 @@ Actions describe the user's steps; variations describe alternative paths to that
 - Make location adjustments available to other group members involved in the search. The timing, confirmation, and handling of parallel searches remain open collaboration questions.
 - Resolve entered addresses and venue names, map selections, and available shared current locations to starting points usable for venue searches.
 - Support switching between location choices and identify missing or unusable location or transport information before running the search.
-- Maintain pub and bar information sufficient to find candidate venues.
+- Maintain information about pubs and bars in London sufficient to find candidate venues.
 - Use the current search inputs to estimate travel times and recommend venues suitable for the group.
 - Provide alternative venues and comparable travel information for each participant, including changes made by another member.
 - Update suggestions when the user runs a search with changed inputs.
