@@ -10,5 +10,6 @@ Keep each fact or decision canonical in one document. Use links between document
 - [`product.md`](product.md) — product vision, MVP scope, and requirements.
 - [`decisions/`](decisions/) — durable choices and the reasoning behind them.
 - [`development/`](development/) — implementation context, API and backend guidance, database notes, and supporting research.
-- [`algorithms/`](algorithms/) — algorithm-specific implementation notes. Algorithm choices themselves belong in [`decisions/`](decisions/).
+- [`algorithms/research.md`](algorithms/research.md) - recommendation research and cost baseline.
+- [`algorithms/mvp.md`](algorithms/mvp.md) - MVP algorithm implementation plan.
 - [`images/`](images/) — documentation assets.
