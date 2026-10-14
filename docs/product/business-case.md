@@ -1,6 +1,6 @@
 # Business case
 
-Status: working assumptions, 14 October 2026
+> **Working assumptions** (14 October 2026)
 
 ## Routing cost per search
 

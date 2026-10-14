@@ -1,5 +1,9 @@
 # AI development workflow
 
+> **Living guidance**
+>
+> Update this workflow when the team's development process changes.
+
 Use this cycle for feature tickets and bug fixes: explore, agree, implement, verify, review, close and hand off. Keep the record proportional to the task. A small fix can use a few bullets; a larger feature may need a separate plan.
 
 The developer owns product decisions, approves the implementation scope, and merges PRs. AI investigates the code, recommends an approach, implements authorised work, and supplies verification evidence.

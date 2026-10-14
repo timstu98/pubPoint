@@ -1,6 +1,8 @@
-# MVP
+# MVP product requirements (PRD)
 
-Status: proposed
+> **Proposed PRD**
+>
+> Scope and open questions are still being resolved.
 
 ## MVP outcomes and success
 
@@ -48,9 +50,9 @@ Tracks an initial list of things that we want the product to do and, more critic
 
 ## User journeys
 
-The following section covers the main user journeys for the MVP. Detailed user flows can be documented separately and linked from here. Technical design belongs in [`development/`](../development/).
+The following section covers the main user journeys for the MVP. Detailed user flows can be documented separately and linked from here. Technical design belongs in [`development/designs/`](../development/designs/).
 
-Actions describe the user's steps; variations describe alternative paths to that outcome. System capabilities describe the responsibilities needed to make the journey possible, with technical design recorded in [`development/`](../development/).
+Actions describe the user's steps; variations describe alternative paths to that outcome. System capabilities describe the responsibilities needed to make the journey possible, with technical design recorded in [`development/designs/`](../development/designs/).
 
 ### Sign up and get started
 

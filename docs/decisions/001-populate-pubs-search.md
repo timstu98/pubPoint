@@ -1,5 +1,7 @@
 # Populate Pubs Note
 
+> **Accepted decision**
+
 ## Problem
 
 Google Maps has a high API cost. Furthermore, a simple search returning pubs in London only retrieves a limited number of pubs, mostly from the city center. It will be necessary to perform a series of searches and ensure these are fairly efficient due to the API cost. These searches will be conducted sporadically, so extreme efficiency is not vital.
