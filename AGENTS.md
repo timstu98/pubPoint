@@ -20,6 +20,7 @@ See `README.md` for setup, development, and verification commands. Read `docs/RE
 
 - When exploring a ticket, implementing a feature or fix, reviewing changes, or handing off work, follow [the AI development workflow](docs/development/ai-workflow.md).
 - When a GitHub issue is provided, use it for task scope and status. Record durable architectural and product decisions in `docs/`, linking them from the relevant issue when one exists.
+- Use Conventional Commits format for PR titles: `<type>[optional scope]: <description>` (for example, `docs: clarify MVP algorithm`).
 - Update the README when setup or development commands change.
 - Before considering a change complete, run the most relevant available tests or checks and report anything not run.
 
