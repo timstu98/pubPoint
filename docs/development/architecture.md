@@ -1,5 +1,9 @@
 # Architecture Document
 
+> **Living reference**
+>
+> Update this page when the implemented system changes.
+
 The project consists of a frontend, backend, and MySQL database, run as separate Docker Compose services.
 
 ## Frontend
