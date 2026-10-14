@@ -40,7 +40,7 @@ Tracks an initial list of things that we want the product to do and, more critic
 - Flexible groups, which act as the starting point of searches but allow dynamic adjustment
 - Flexible user state for searches, where the home address, work address, custom address, or current location can be easily swapped by any member within their search
 - Minimal-friction method to amend groups for or create ad hoc searches
-- Searching for and comparing pubs or bars for a group
+- Searching for and comparing pubs or bars in London for a group
 - Persistent user home address and transport settings
 - Viewing travel information and opening external route planners
 
@@ -55,6 +55,7 @@ Tracks an initial list of things that we want the product to do and, more critic
 - Allowing users to change preferences for the search algorithm (e.g., one person is happy to travel further, dislike certain areas)
 - Group-specific default starting location for a user - just have a default on the user level
 - Venues other than pubs or bars
+- Venue searches outside London
 - Route finding in app
 - Live venue information
 - Suggesting alternative efficient transport methods for different users in a group to a venue (E.g., it would be faster to walk than take the bus to a venue.)
@@ -95,7 +96,7 @@ Actions describe the user's steps; variations describe alternative paths to that
 
 ### Find a venue for a meetup
 
-**Scenario:** A person starts a search from a saved group or an ad hoc set of participants, adjusts their starting locations and transport choices, and compares suggestions to choose a suitable pub or bar.
+**Scenario:** A person starts a search from a saved group or an ad hoc set of participants, adjusts their starting locations and transport choices, and compares suggestions to choose a suitable pub or bar in London.
 
 **Starting conditions:** The person knows who they want to include and can access the saved group if using one.
 
@@ -129,7 +130,7 @@ Actions describe the user's steps; variations describe alternative paths to that
 - Make location adjustments available to other group members involved in the search. The timing, confirmation, and handling of parallel searches remain open collaboration questions.
 - Resolve entered addresses and venue names, map selections, and available shared current locations to starting points usable for venue searches.
 - Support switching between location choices and identify missing or unusable location or transport information before running the search.
-- Maintain pub and bar information sufficient to find candidate venues.
+- Maintain information about pubs and bars in London sufficient to find candidate venues.
 - Use the current search inputs to estimate travel times and recommend venues suitable for the group.
 - Provide alternative venues and comparable travel information for each participant, including changes made by another member.
 - Update suggestions when the user runs a search with changed inputs.

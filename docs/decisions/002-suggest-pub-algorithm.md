@@ -4,7 +4,7 @@
 
 ### Challenge
 
-Api calls turned out to be more expensive (monetarily) than first conceived. Minimising api calls for a user search will be key. This will require as much pre-compute as possible to minimise cost. Exact cost TBD.
+Api calls turned out to be more expensive (monetarily) than first conceived. Minimising api calls for a user search will be key. This will require as much pre-compute as possible to minimise cost. The brute-force approach cost for one group search is estimated below, and acts as a baseline to compare other strategies against.
 
 ### Solution
 
@@ -27,9 +27,19 @@ In theory, groups could be of any size. For algorithm comparison, I will assume 
 
 Ultimately, I would like to fine-tune the algorithm to prioritize different characteristics of pubs (e.g., quality of food), filter the pubs (e.g., closing times, dog-friendly), and compute different modes of transport for the users. These add significant complexity to the algorithm, so most of these features will be included down the line.
 
-API COST ADD HERE WHEN CALCULATED. For algorithm comparison, I will assume a cost of XXXXp per call. A call involves calculating the journey time between two points for a single mode of transport.
+### Brute Force Approach Baseline
 
-Summary: Our aim is to suggest a suitable pub for 4 users located within Greater London, chosen from the ~3,500 total pubs in London. A suitable pub will primarily be defined by minimal total journey time for the group. Other factors include fairness of journey time distribution and pub quality (i.e., rating).
+This is a brute force approach to finding the best bar/pub in London that guarantees an optimal solution. Every other strategy can be considered an improvement upon this cost estimate and can be evaluated relative to this approach.
+
+Checking every venue for every person requires `3,500 venues × 4 people = 14,000` journeys for one group search, using one transport mode. The estimate below applies the first paid pricing tier to all 14,000 journeys, with no free allowance. It covers journey-time calculations only, not collecting venue data.
+
+| Provider and API                   |              Paid rate | Cost for one group search |
+| ---------------------------------- | ---------------------: | ------------------------: |
+| Google Routes, basic (Essentials)  |  $5 per 1,000 journeys |                       $70 |
+| Google Routes, traffic-aware (Pro) | $10 per 1,000 journeys |                      $140 |
+| Mapbox Directions or Matrix        |  $2 per 1,000 journeys |                       $28 |
+
+For Google Compute Route Matrix and Mapbox Matrix, a journey is a billable origin-destination element. Batching elements into fewer API requests does not reduce this estimate. TravelTime has fixed annual commercial licence pricing, so it cannot be assigned a per-search price from its public rates. The routing provider and transport mode have not been selected; these figures are comparison estimates, not a forecast of the eventual bill. See [API cost research](../development/api-cost-research.md) for provider pricing.
 
 ## Options considered
 
