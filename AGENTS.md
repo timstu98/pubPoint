@@ -27,6 +27,7 @@ See `README.md` for setup, development, and verification commands. Read `docs/RE
 ## GitHub pull requests
 
 - When creating a pull request related to a GitHub issue, append its reference in square brackets (for example, `[#123]`) to the end of the PR title. Omit the reference when the PR is unrelated to an issue.
+- After a PR merges, clean up its linked worktree on request. Confirm the merge and inspect tracked, untracked, and ignored files before removal; preserve worktrees with local files for review.
 
 ## Code review
 
