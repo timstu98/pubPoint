@@ -8,7 +8,7 @@
 
 ## Setup and development
 
-See `README.md` for setup, development, and verification commands. Read `docs/README.md` to find product requirements, architecture guidance, and decision records relevant to the task.
+See `README.md` for setup, development, and verification commands. Read `docs/README.md` to find product requirements, technical designs, decision records, and architecture guidance relevant to the task.
 
 ## Scripts
 

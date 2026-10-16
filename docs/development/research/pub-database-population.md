@@ -1,6 +1,6 @@
 # Pub database population
 
-This note records the research and working assumptions behind the pub population utility. The durable implementation decision is recorded in [`docs/decisions/001-populate-pubs-search.md`](../../decisions/001-populate-pubs-search.md).
+This note records the evidence and working assumptions behind the [pub database population design](../designs/pub-database-population.md).
 
 ## Goals
 
@@ -21,7 +21,7 @@ This note records the research and working assumptions behind the pub population
 
 - The research found that Places API (New) Nearby Search returns at most 20 results and does not provide a next-page token.
 - The legacy Nearby Search was understood to return at most 60 results, so it is not sufficient as a complete London-wide strategy.
-- The current code uses text search over each rectangle and follows `nextPageToken` when returned. Its `api_calls` counter currently counts rectangles only; it does not count page-token requests and must not be treated as a billing estimate.
+- The current utility's `api_calls` counter counts rectangles only. It omits page-token requests and must not be treated as a billing estimate.
 - Historical request and cost estimates are recorded in [`api-cost-research.md`](api-cost-research.md); confirm current Google pricing and page limits before scheduling recurring runs.
 
 ## Coordinates recorded during research
