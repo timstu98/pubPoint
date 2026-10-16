@@ -7,3 +7,5 @@ Each design should state its status (draft, in review, accepted, or superseded),
 Designs record a proposed or agreed approach and the choices specific to that work. In this repo, RFC means a design circulated for comments: it is the review stage, not a separate document type. Once accepted, it remains a design, though people may still call it an RFC informally. Record a choice that will govern later designs or can change independently in an [ADR](../../decisions/README.md); link to it here instead of repeating its analysis. Keep supporting measurements and experiments in [research](../research/) and link to them. Once a change is built, update the living architecture, API, or database reference where needed; those references describe the current system.
 
 The [MVP algorithm plan](../../search-algorithm/mvp.md) is an existing focused design kept with the algorithm research. New general feature designs belong here.
+
+Start with the draft [MVP technical design and implementation order](mvp-technical-design.md).

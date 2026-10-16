@@ -8,12 +8,15 @@ Product, design, and decision documents define the work. Create GitHub issues fr
 
 For plain-language definitions of common B2C product and engineering documents, see [Common product and engineering documents](document-types.md).
 
+The [PubPoint glossary](../GLOSSARY.md) defines the product's core terms.
+
 ## How PubPoint's documents fit
 
 - **Vision and strategy:** [Product vision](product/vision.md) describes the problem, audience, and recommendation goals. There is no committed roadmap yet.
 - **Business case:** [Business case](product/business-case.md). Its figures and ideas are working assumptions.
+- **Future ideas:** [Product ideas](product/ideas.md) captures possibilities beyond the current MVP.
 - **PRD:** The [MVP PRD](product/mvp-prd.md) covers overall outcomes, scope, user journeys, shared requirements, and open questions. It is still proposed, and some quality targets remain to be defined.
-- **Technical designs:** Plans for substantial technical changes belong in [development/designs/](development/designs/). We call a design an RFC while requesting comments on it; once accepted, it remains an accepted design. Choices specific to that work stay in the design.
+- **Technical designs:** Plans for substantial technical changes belong in [development/designs/](development/designs/). The [MVP technical design overview](development/designs/mvp-technical-design.md) orders the major implementation slices. We call a design an RFC while requesting comments on it; once accepted, it remains an accepted design. Choices specific to that work stay in the design.
 - **ADRs:** [Decision records](decisions/) preserve significant choices that may guide later designs or be reconsidered independently. Designs link to relevant ADRs instead of repeating their analysis.
 - **Current system reference:** [Architecture](development/architecture.md), [API](development/api.md), and [database](development/database.md) are separate living references for their subjects. Code and migrations define the exact implemented behavior and schema.
 
