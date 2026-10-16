@@ -82,7 +82,7 @@ Prepare the PR with the problem, resulting behaviour, relevant issue, verificati
 
 Deployment and release are not necessary until the MVP stage is reached.
 
-Update canonical docs when behaviour or decisions change. Record durable architectural choices in [decision records](../decisions/README.md), implementation guidance under `development/`, and changed setup or verification commands in the README. Link these from the issue when one exists.
+Update canonical docs when behaviour or decisions change. Keep the approach to a particular change in [technical designs](designs/README.md), and record lasting choices that may govern later work in [ADRs](../decisions/README.md). Link between them rather than repeating the reasoning. Update living implementation guidance under `development/` and changed setup or verification commands in the README. Link relevant documents from the issue when one exists.
 
 **Complete:** the agreed development target is reached, verification results and PR status are recorded, and follow-ups are visible. State whether the PR is ready for review, approved, or merged, and identify any remaining action for the developer.
 

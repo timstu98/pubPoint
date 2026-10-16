@@ -1,7 +1,11 @@
-# Decisions
+# Architecture decisions
 
-Decision records capture durable choices, the problem they address, and the alternatives considered. Research and implementation detail should remain in `docs/development/` or `docs/search-algorithm/` and be linked from here when relevant.
+An ADR records one significant choice that may govern multiple designs or be reconsidered independently of its original project. Include the context, meaningful alternatives, decision, and consequences. Keep implementation details in [technical designs](../development/designs/README.md), and link between the two without repeating the analysis.
 
-Mark each record as proposed, accepted, or superseded. Keep accepted records as history; if a choice changes, add a new record that supersedes the old one.
+Mark each ADR as proposed, accepted, or superseded. Preserve an accepted record as history; document a changed choice in a new ADR that links back to it. Small choices specific to one piece of work belong in its design.
 
-- [`001-populate-pubs-search.md`](001-populate-pubs-search.md) — choose Places API Text Search over a London grid for pub collection.
+The initial stack choices are recorded below. Database hosting is a separate decision from the database engine.
+
+- [001: Use React for the frontend](001-react-frontend.md)
+- [002: Use Flask for the backend](002-flask-backend.md)
+- [003: Use MySQL as the relational database](003-mysql-database.md)

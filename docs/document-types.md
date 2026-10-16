@@ -22,15 +22,15 @@ The number of documents and how they change over time depend on their purpose. A
 - **Does not contain:** The detailed engineering solution for each feature.
 - **Typical pattern:** Many over time, often one per feature or initiative, though one PRD can also cover a whole release. Each is the current source of truth for its agreed product scope while that scope is being developed.
 
-## Technical design document or RFC
+## Technical design document and RFC review
 
-- **Usually contains:** How a requirement will be built, the main options and tradeoffs, changes to components, data or APIs, risks, and how the solution will be checked. An RFC is a proposal shared for comments before a decision.
+- **Usually contains:** How a particular change will be built, the main options and tradeoffs, changes to components, data or APIs, risks, and how the solution will be checked.
 - **Does not contain:** A replacement for the PRD's user needs and product scope.
-- **Typical pattern:** Many over time, one for each substantial technical change. A proposal may be revised during review, then accepted, rejected, or superseded.
+- **Typical pattern:** Many designs over time, one for each substantial technical change. A draft may be shared as an RFC to invite comments; after review, the design may be accepted or rejected, and later superseded. Teams often continue calling the file an RFC informally.
 
 ## Architecture decision record (ADR)
 
-- **Usually contains:** One lasting technical decision, why it was made, and the alternatives considered.
+- **Usually contains:** One significant technical choice, its context, alternatives, reasons, and consequences.
 - **Does not contain:** Every implementation step or a full account of the system.
 - **Typical pattern:** Many small records, one per decision. Keep the historical decision intact; record a later reversal in a new ADR that supersedes it.
 
@@ -51,12 +51,12 @@ flowchart LR
     V["Product-wide vision and evidence"] --> P
 
     subgraph feature["Repeat for each substantial feature"]
-        P["Relevant requirements from a PRD"] --> D["Technical design / RFC"] --> I["Implementation"] --> M["Measured outcomes"]
-        D -. "record decisions if needed" .-> A["ADRs: zero or more"]
+        P["Relevant requirements from a PRD"] --> D["Technical design (RFC in review)"] --> I["Implementation"] --> M["Measured outcomes"]
     end
 
+    D -. "record lasting choices if needed" .-> A["ADRs: zero or more"]
     D -. "consult" .-> L["Living references: architecture, API, data"]
     I -. "update" .-> L
 ```
 
-The vision and evidence are product-wide; the boxed flow repeats for each substantial feature. The same PRD may supply requirements to several feature flows. There is usually one technical proposal for a substantial feature, while each ADR records one lasting decision, if any. A feature can produce several ADRs. The living references sit alongside feature work and are updated as the system changes. A task (GitHub issue for this repo) tracks a bounded piece of work; it does not replace these documents.
+The vision and evidence are product-wide; the boxed flow repeats for each substantial feature. The same PRD may supply requirements to several feature flows. An ADR may guide several later designs; a design links to it and explains the work-specific approach. The living references sit alongside feature work and are updated as the system changes. A task or issue tracks a bounded piece of work; it does not replace these documents.
