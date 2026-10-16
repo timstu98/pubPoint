@@ -25,12 +25,14 @@ Tracks an initial list of things that we want the product to do and, more critic
 - Flexible groups, which act as the starting point of searches but allow dynamic adjustment
 - Flexible user state for searches, where the home address, work address, custom address, or current location can be easily swapped by any member within their search
 - Minimal-friction method to amend groups for or create ad hoc searches
+- A home view listing saved groups by recent activity
 - Searching for and comparing pubs or bars in London for a group
 - Persistent user home address and transport settings
 - Viewing travel information and opening external route planners
 
 ### Out of scope
 
+- Resuming previous ad hoc searches or listing them as temporary groups on Home
 - Recent people lists based on previous groups or searches
 - Friends lists and friendship requests
 - Guest membership in saved groups
