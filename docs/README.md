@@ -4,6 +4,8 @@ This directory is the repository’s durable context for product direction, arch
 
 Keep each fact or decision canonical in one document. Use links between documents instead of repeating the same guidance in multiple places.
 
+Product, design, and decision documents define the work. Create GitHub issues from those documents to track implementation, and link issues back to the relevant documents. Keep issue numbers and task status in the issues rather than the durable documents.
+
 For plain-language definitions of common B2C product and engineering documents, see [Common product and engineering documents](document-types.md).
 
 ## How PubPoint's documents fit
