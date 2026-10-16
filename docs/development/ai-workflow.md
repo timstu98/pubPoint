@@ -58,6 +58,8 @@ Run edits, checks, commits, and pushes from the chosen checkout. Follow the repo
 
 Add meaningful tests for changed behaviour, failure cases, and regressions. Use existing test patterns where suitable. If a new dependency, architecture choice, blocker, or scope increase changes the agreed approach, present the decision and update the brief before doing the dependent work. Continue independent work where possible.
 
+Keep accepted designs current during implementation: update the main text with agreed changes and their reasons in the same PR as the code. Follow the [design lifecycle](designs/README.md#design-lifecycle).
+
 **Ready to verify:** the agreed slice is implemented, required supporting changes are included, and any scope changes have been agreed.
 
 ## 3. Verify the behaviour
@@ -83,6 +85,8 @@ Prepare the PR with the problem, resulting behaviour, relevant issue, verificati
 Deployment and release are not necessary until the MVP stage is reached.
 
 Update canonical docs when behaviour or decisions change. Keep the approach to a particular change in [technical designs](designs/README.md), and record lasting choices that may govern later work in [ADRs](../decisions/README.md). Link between them rather than repeating the reasoning. Update living implementation guidance under `development/` and changed setup or verification commands in the README. Link relevant documents from the issue when one exists.
+
+At feature completion, reconcile its design with the delivered implementation, mark it implemented, and park it. Maintain the living references for subsequent system changes.
 
 **Complete:** the agreed development target is reached, verification results and PR status are recorded, and follow-ups are visible. State whether the PR is ready for review, approved, or merged, and identify any remaining action for the developer.
 
