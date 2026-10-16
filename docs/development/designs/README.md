@@ -8,4 +8,4 @@ Designs record a proposed or agreed approach and the choices specific to that wo
 
 The [MVP algorithm plan](../../search-algorithm/mvp.md) is an existing focused design kept with the algorithm research. New general feature designs belong here.
 
-Start with the draft [MVP technical design and implementation order](mvp-technical-design.md).
+Start with the draft [MVP technical design and implementation order](mvp-technical-design.md). The evolving model and screen guidance live in the [database](../database.md) and frontend references.
