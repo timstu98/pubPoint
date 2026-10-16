@@ -25,13 +25,14 @@ Tracks an initial list of things that we want the product to do and, more critic
 - Flexible groups, which act as the starting point of searches but allow dynamic adjustment
 - Flexible user state for searches, where the home address, work address, custom address, or current location can be easily swapped by any member within their search
 - Minimal-friction method to amend groups for or create ad hoc searches
-- A recent-groups home view with saved groups and resumable ad hoc searches shown as temporary groups
+- A home view listing saved groups by recent activity
 - Searching for and comparing pubs or bars in London for a group
 - Persistent user home address and transport settings
 - Viewing travel information and opening external route planners
 
 ### Out of scope
 
+- Resuming previous ad hoc searches or listing them as temporary groups on Home
 - Recent people lists based on previous groups or searches
 - Friends lists and friendship requests
 - Guest membership in saved groups
@@ -101,7 +102,6 @@ Actions describe the user's steps; variations describe alternative paths to that
 
 - Start from a saved group, using its membership and members' personal defaults, or build the participant list ad hoc.
 - Change participants, starting locations, or transport choices and search again when plans change.
-- Resume an ad hoc search from its temporary-group entry on Home.
 - Continue to [Create and manage a reusable group](#create-and-manage-a-reusable-group) to retain accepted members for reuse. Guests stay in the current search.
 - Optionally enter a guest's email address or phone number and invite them to the saved group associated with the search. Show their invitation as pending while they continue to participate as a guest.
 - For an ad hoc search, create a saved group before sending group invitations.
@@ -110,7 +110,6 @@ Actions describe the user's steps; variations describe alternative paths to that
 
 - Initialise a search from saved group membership and user settings, or from participants selected ad hoc.
 - Track the participants, starting locations, and transport choices for each search separately from saved groups and user settings.
-- Retain search inputs so an authorised user can resume a temporary group from Home.
 - Represent registered users and guests as search participants, including guests who have not signed up or completed onboarding.
 - Include guests in recommendations and travel comparisons without requiring contact details or invitation acceptance.
 - Link a guest's optional invitation to the saved group and their entry in the originating search, keeping the guest entry usable while the invitation is pending.

@@ -14,9 +14,8 @@ A user's accepted place in a saved group. A pending invitation is not membership
 **Search**:
 A meetup's participants, starting points, transport choices, and venue recommendations, which can be adjusted and searched again.
 
-**Temporary group**:
-The user-facing name for the people brought together in an ad hoc search, without first saving a reusable group.
-_Avoid_: Guest membership
+**Ad hoc search**:
+A search started from participants chosen for that meetup, without first selecting a saved group.
 
 **Participant**:
 A registered user or guest included in a particular search.
