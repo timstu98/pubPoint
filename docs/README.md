@@ -18,7 +18,7 @@ The [PubPoint glossary](../GLOSSARY.md) defines the product's core terms.
 - **PRD:** The [MVP PRD](product/mvp-prd.md) covers overall outcomes, scope, user journeys, shared requirements, and open questions. It is still proposed, and some quality targets remain to be defined.
 - **Technical designs:** Plans for substantial technical changes belong in [development/designs/](development/designs/). The [MVP technical design overview](development/designs/mvp-technical-design.md) orders the major implementation slices. We call a design an RFC while requesting comments on it; once accepted, it remains an accepted design. Choices specific to that work stay in the design.
 - **ADRs:** [Decision records](decisions/) preserve significant choices that may guide later designs or be reconsidered independently. Designs link to relevant ADRs instead of repeating their analysis.
-- **Living references:** [Architecture](development/architecture.md), [API](development/api.md), and [database](development/database.md). Keep draft model and screen guidance clearly marked alongside current implementation. Code and migrations define the exact implemented behavior and schema.
+- **Living references:** [Architecture](development/architecture.md), [API](development/api.md), [database](development/database.md), and [frontend](development/frontend.md). Keep draft model and screen guidance clearly marked alongside current implementation. Code and migrations define the exact implemented behavior and schema.
 
 The MVP PRD covers the product as a whole, so several designs may address different parts of it. There is no expected one-to-one mapping: each design should link to the requirements it addresses.
 
